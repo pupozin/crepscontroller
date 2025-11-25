@@ -11,6 +11,9 @@
         public DateTime DataCriacao { get; set; } = DateTime.Now;
         public DateTime? DataConclusao { get; set; }
 
+        public decimal ValorTotal { get; set; }
+
+
         // Navegação
         public ICollection<ItensPedido> Itens { get; set; } = new List<ItensPedido>();
     }
