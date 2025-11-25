@@ -1,5 +1,110 @@
 [
   {
+    "ContainingType": "CrepeControladorApi.Controllers.DashboardController",
+    "Method": "ObterHorariosPicoDiaSemana",
+    "RelativePath": "api/Dashboard/horarios/dia-semana",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "diaSemana",
+        "Type": "System.Byte",
+        "IsRequired": false
+      },
+      {
+        "Name": "ano",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.DashboardController",
+    "Method": "ObterHorariosPicoMes",
+    "RelativePath": "api/Dashboard/horarios/mes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.DashboardController",
+    "Method": "ObterItensRanking",
+    "RelativePath": "api/Dashboard/itens-ranking",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dataInicio",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "dataFim",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.DashboardController",
+    "Method": "ObterResumoPeriodo",
+    "RelativePath": "api/Dashboard/resumo",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dataInicio",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "dataFim",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.DashboardController",
+    "Method": "ObterTipoPedido",
+    "RelativePath": "api/Dashboard/tipo-pedido",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dataInicio",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "dataFim",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "CrepeControladorApi.Controllers.ItensController",
     "Method": "ObterItens",
     "RelativePath": "api/Itens",

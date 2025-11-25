@@ -32,11 +32,12 @@ namespace CrepeControladorApi.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> ObterItem(int id)
         {
-            var item = _context.Itens
+            var itens = await _context.Itens
                 .FromSqlInterpolated($"EXEC sp_Item_Obter @ItemId = {id}")
                 .AsNoTracking()
-                .AsEnumerable()
-                .FirstOrDefault();
+                .ToListAsync();
+
+            var item = itens.FirstOrDefault();
 
             if (item == null)
             {
