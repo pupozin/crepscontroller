@@ -1,0 +1,6 @@
+@CrepeControladorApi_HostAddress = http://localhost:5207
+
+GET {{CrepeControladorApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
