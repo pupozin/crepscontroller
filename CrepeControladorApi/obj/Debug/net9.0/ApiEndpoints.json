@@ -16,6 +16,27 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "CrepeControladorApi.Controllers.ItemsController",
+    "Method": "AtualizarItem",
+    "RelativePath": "api/Items/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "itemDto",
+        "Type": "CrepeControladorApi.Dtos.ItemUpdateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
     "Method": "CriarPedido",
     "RelativePath": "api/Pedidos",
@@ -26,6 +47,27 @@
       {
         "Name": "pedidoDto",
         "Type": "CrepeControladorApi.Dtos.PedidoCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "AtualizarPedido",
+    "RelativePath": "api/Pedidos/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "pedidoDto",
+        "Type": "CrepeControladorApi.Dtos.PedidoUpdateDto",
         "IsRequired": true
       }
     ],

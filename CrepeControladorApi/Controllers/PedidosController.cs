@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
 using CrepeControladorApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrepeControladorApi.Controllers
 {
@@ -81,6 +84,98 @@ namespace CrepeControladorApi.Controllers
                     i.TotalItem
                 })
             });
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> AtualizarPedido(int id, [FromBody] PedidoUpdateDto pedidoDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.Itens)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            if (!StatusPermiteAlteracao(pedido.Status))
+            {
+                return BadRequest("Pedido so pode ser atualizado quando estiver Preparando ou Pronto.");
+            }
+
+            if (pedidoDto.Itens == null || pedidoDto.Itens.Count == 0)
+            {
+                ModelState.AddModelError(nameof(pedidoDto.Itens), "Informe ao menos um item para o pedido.");
+                return ValidationProblem(ModelState);
+            }
+
+            pedido.Codigo = pedidoDto.Codigo;
+            pedido.Cliente = pedidoDto.Cliente;
+            pedido.TipoPedido = pedidoDto.TipoPedido;
+            pedido.Status = pedidoDto.Status;
+            pedido.Observacao = pedidoDto.Observacao;
+
+            decimal valorTotal = 0m;
+            var novosItens = new List<ItensPedido>();
+
+            foreach (var itemDto in pedidoDto.Itens)
+            {
+                var item = await _context.Itens.FindAsync(itemDto.ItemId);
+                if (item == null)
+                {
+                    ModelState.AddModelError(nameof(pedidoDto.Itens), $"Item com Id {itemDto.ItemId} nao foi encontrado.");
+                    return ValidationProblem(ModelState);
+                }
+
+                var totalItem = item.Preco * itemDto.Quantidade;
+
+                novosItens.Add(new ItensPedido
+                {
+                    ItemId = item.Id,
+                    Quantidade = itemDto.Quantidade,
+                    PrecoUnitario = item.Preco,
+                    TotalItem = totalItem
+                });
+
+                valorTotal += totalItem;
+            }
+
+            _context.ItensPedidos.RemoveRange(pedido.Itens);
+            pedido.Itens.Clear();
+
+            foreach (var novoItem in novosItens)
+            {
+                pedido.Itens.Add(novoItem);
+            }
+
+            pedido.ValorTotal = valorTotal;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                pedido.Id,
+                pedido.Codigo,
+                pedido.Status,
+                pedido.ValorTotal,
+                Itens = pedido.Itens.Select(i => new
+                {
+                    i.ItemId,
+                    i.Quantidade,
+                    i.TotalItem
+                })
+            });
+        }
+
+        private static bool StatusPermiteAlteracao(string status)
+        {
+            return string.Equals(status, "Preparando", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(status, "Pronto", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

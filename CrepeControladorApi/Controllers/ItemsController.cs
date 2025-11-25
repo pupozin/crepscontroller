@@ -42,5 +42,34 @@ namespace CrepeControladorApi.Controllers
                 item.Ativo
             });
         }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> AtualizarItem(int id, [FromBody] ItemUpdateDto itemDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var item = await _context.Itens.FindAsync(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            item.Nome = itemDto.Nome;
+            item.Preco = itemDto.Preco;
+            item.Ativo = itemDto.Ativo;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                item.Id,
+                item.Nome,
+                item.Preco,
+                item.Ativo
+            });
+        }
     }
 }
