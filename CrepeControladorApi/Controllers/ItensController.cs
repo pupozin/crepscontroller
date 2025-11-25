@@ -1,19 +1,49 @@
+using System.Linq;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
 using CrepeControladorApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrepeControladorApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ItemsController : ControllerBase
+    public class ItensController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ItemsController(AppDbContext context)
+        public ItensController(AppDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ObterItens()
+        {
+            var itens = await _context.Itens
+                .FromSqlRaw("EXEC sp_Item_Obter")
+                .AsNoTracking()
+                .ToListAsync();
+
+            return Ok(itens);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> ObterItem(int id)
+        {
+            var item = _context.Itens
+                .FromSqlInterpolated($"EXEC sp_Item_Obter @ItemId = {id}")
+                .AsNoTracking()
+                .AsEnumerable()
+                .FirstOrDefault();
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(item);
         }
 
         [HttpPost]
@@ -34,7 +64,7 @@ namespace CrepeControladorApi.Controllers
             _context.Itens.Add(item);
             await _context.SaveChangesAsync();
 
-            return Created($"api/items/{item.Id}", new
+            return Created($"api/itens/{item.Id}", new
             {
                 item.Id,
                 item.Nome,
@@ -71,5 +101,6 @@ namespace CrepeControladorApi.Controllers
                 item.Ativo
             });
         }
+
     }
 }

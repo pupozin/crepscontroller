@@ -1,8 +1,18 @@
 [
   {
-    "ContainingType": "CrepeControladorApi.Controllers.ItemsController",
+    "ContainingType": "CrepeControladorApi.Controllers.ItensController",
+    "Method": "ObterItens",
+    "RelativePath": "api/Itens",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.ItensController",
     "Method": "CriarItem",
-    "RelativePath": "api/Items",
+    "RelativePath": "api/Itens",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -16,9 +26,25 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "CrepeControladorApi.Controllers.ItemsController",
+    "ContainingType": "CrepeControladorApi.Controllers.ItensController",
+    "Method": "ObterItem",
+    "RelativePath": "api/Itens/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.ItensController",
     "Method": "AtualizarItem",
-    "RelativePath": "api/Items/{id}",
+    "RelativePath": "api/Itens/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -38,6 +64,16 @@
   },
   {
     "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "ObterPedidos",
+    "RelativePath": "api/Pedidos",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
     "Method": "CriarPedido",
     "RelativePath": "api/Pedidos",
     "HttpMethod": "POST",
@@ -47,6 +83,22 @@
       {
         "Name": "pedidoDto",
         "Type": "CrepeControladorApi.Dtos.PedidoCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "ObterPedido",
+    "RelativePath": "api/Pedidos/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],

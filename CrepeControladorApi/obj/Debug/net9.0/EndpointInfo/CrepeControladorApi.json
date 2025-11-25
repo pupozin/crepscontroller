@@ -5,10 +5,20 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/Items": {
+    "/api/Itens": {
+      "get": {
+        "tags": [
+          "Itens"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
       "post": {
         "tags": [
-          "Items"
+          "Itens"
         ],
         "requestBody": {
           "content": {
@@ -36,10 +46,31 @@
         }
       }
     },
-    "/api/Items/{id}": {
+    "/api/Itens/{id}": {
+      "get": {
+        "tags": [
+          "Itens"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
       "put": {
         "tags": [
-          "Items"
+          "Itens"
         ],
         "parameters": [
           {
@@ -79,6 +110,16 @@
       }
     },
     "/api/Pedidos": {
+      "get": {
+        "tags": [
+          "Pedidos"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
       "post": {
         "tags": [
           "Pedidos"
@@ -110,6 +151,27 @@
       }
     },
     "/api/Pedidos/{id}": {
+      "get": {
+        "tags": [
+          "Pedidos"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
       "put": {
         "tags": [
           "Pedidos"

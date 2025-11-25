@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
@@ -18,6 +19,48 @@ namespace CrepeControladorApi.Controllers
         public PedidosController(AppDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ObterPedidos()
+        {
+            var pedidos = await _context.Pedidos
+                .FromSqlRaw("EXEC sp_Pedido_Obter")
+                .AsNoTracking()
+                .ToListAsync();
+
+            return Ok(pedidos);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> ObterPedido(int id)
+        {
+            var pedido = _context.Pedidos
+                .FromSqlInterpolated($"EXEC sp_Pedido_Obter @PedidoId = {id}")
+                .AsNoTracking()
+                .AsEnumerable()
+                .FirstOrDefault();
+
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            var itens = await ObterItensPedidoPorProcedure(id);
+
+            return Ok(new
+            {
+                pedido.Id,
+                pedido.Codigo,
+                pedido.Cliente,
+                pedido.TipoPedido,
+                pedido.Status,
+                pedido.Observacao,
+                pedido.DataCriacao,
+                pedido.DataConclusao,
+                pedido.ValorTotal,
+                Itens = itens
+            });
         }
 
         [HttpPost]
@@ -176,6 +219,56 @@ namespace CrepeControladorApi.Controllers
         {
             return string.Equals(status, "Preparando", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(status, "Pronto", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task<List<PedidoItemDetalheDto>> ObterItensPedidoPorProcedure(int pedidoId)
+        {
+            var itens = new List<PedidoItemDetalheDto>();
+            var connection = _context.Database.GetDbConnection();
+            var fecharConexao = connection.State != ConnectionState.Open;
+
+            if (fecharConexao)
+            {
+                await connection.OpenAsync();
+            }
+
+            try
+            {
+                await using var command = connection.CreateCommand();
+                command.CommandText = "sp_ItensPedido_ObterPorPedido";
+                command.CommandType = CommandType.StoredProcedure;
+
+                var parametro = command.CreateParameter();
+                parametro.ParameterName = "@PedidoId";
+                parametro.Value = pedidoId;
+                command.Parameters.Add(parametro);
+
+                await using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    itens.Add(new PedidoItemDetalheDto
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        PedidoId = reader.GetInt32(reader.GetOrdinal("PedidoId")),
+                        ItemId = reader.GetInt32(reader.GetOrdinal("ItemId")),
+                        NomeItem = reader.GetString(reader.GetOrdinal("NomeItem")),
+                        PrecoItem = reader.GetDecimal(reader.GetOrdinal("PrecoItem")),
+                        ItemAtivo = reader.GetBoolean(reader.GetOrdinal("ItemAtivo")),
+                        Quantidade = reader.GetInt32(reader.GetOrdinal("Quantidade")),
+                        PrecoUnitario = reader.GetDecimal(reader.GetOrdinal("PrecoUnitario")),
+                        TotalItem = reader.GetDecimal(reader.GetOrdinal("TotalItem"))
+                    });
+                }
+            }
+            finally
+            {
+                if (fecharConexao)
+                {
+                    await connection.CloseAsync();
+                }
+            }
+
+            return itens;
         }
     }
 }
