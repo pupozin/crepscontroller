@@ -155,4 +155,3 @@ C:\Users\GabrielPupo\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net9.
 C:\Users\GabrielPupo\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net9.0\CrepeControladorApi.pdb
 C:\Users\GabrielPupo\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net9.0\CrepeControladorApi.genruntimeconfig.cache
 C:\Users\GabrielPupo\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net9.0\ref\CrepeControladorApi.dll
-C:\Users\GabrielPupo\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

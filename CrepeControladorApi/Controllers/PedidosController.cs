@@ -78,9 +78,11 @@ namespace CrepeControladorApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
+            var codigoPedido = await GerarCodigoPedidoAsync();
+
             var pedido = new Pedido
             {
-                Codigo = pedidoDto.Codigo,
+                Codigo = codigoPedido,
                 Cliente = pedidoDto.Cliente,
                 TipoPedido = pedidoDto.TipoPedido,
                 Observacao = pedidoDto.Observacao
@@ -158,7 +160,6 @@ namespace CrepeControladorApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            pedido.Codigo = pedidoDto.Codigo;
             pedido.Cliente = pedidoDto.Cliente;
             pedido.TipoPedido = pedidoDto.TipoPedido;
             pedido.Status = pedidoDto.Status;
@@ -220,6 +221,17 @@ namespace CrepeControladorApi.Controllers
         {
             return string.Equals(status, "Preparando", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(status, "Pronto", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task<string> GerarCodigoPedidoAsync()
+        {
+            var ultimoId = await _context.Pedidos
+                .OrderByDescending(p => p.Id)
+                .Select(p => p.Id)
+                .FirstOrDefaultAsync();
+
+            var proximoNumero = ultimoId + 1;
+            return $"Pedido #{proximoNumero:D4}";
         }
 
         private async Task<List<PedidoItemDetalheDto>> ObterItensPedidoPorProcedure(int pedidoId)

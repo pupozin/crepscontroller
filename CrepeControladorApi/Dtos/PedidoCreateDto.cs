@@ -4,10 +4,6 @@ namespace CrepeControladorApi.Dtos
 {
     public class PedidoCreateDto
     {
-        [Required]
-        [StringLength(20)]
-        public string Codigo { get; set; } = null!;
-
         [StringLength(100)]
         public string? Cliente { get; set; }
 
