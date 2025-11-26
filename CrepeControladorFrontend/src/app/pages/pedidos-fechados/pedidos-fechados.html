@@ -5,19 +5,28 @@
   </div>
 
   <div class="tabs">
-    <button class="tab" [class.active]="abaAtiva === 'resumo'" (click)="selecionarAba('resumo')">
-      Resumo
-    </button>
+    <button class="tab active" type="button">Resumo</button>
   </div>
 
-  <div *ngIf="abaAtiva === 'resumo'" class="aba-tipos">
+  <div class="aba-tipos">
     <div class="abas-internas">
-      <button class="active">
-        Resumo ({{ pedidosFechados.length }})
+      <button
+        type="button"
+        [class.active]="abaAtiva === 'finalizado'"
+        (click)="selecionarAba('finalizado')"
+      >
+        Finalizado ({{ pedidosFinalizados.length }})
+      </button>
+      <button
+        type="button"
+        [class.active]="abaAtiva === 'cancelado'"
+        (click)="selecionarAba('cancelado')"
+      >
+        Cancelado ({{ pedidosCancelados.length }})
       </button>
     </div>
 
-    <div class="lista-processos" *ngIf="pedidosFechados.length">
+    <div class="lista-processos" *ngIf="pedidosAtuais.length">
       <div *ngFor="let pedido of pedidosVisiveis" class="linha-processo">
         <span class="codigo">{{ pedido.codigo }}</span>
         <span class="status">
@@ -30,8 +39,8 @@
       </div>
     </div>
 
-    <div class="estado-vazio" *ngIf="!pedidosFechados.length">
-      Nenhum pedido fechado.
+    <div class="estado-vazio" *ngIf="!pedidosAtuais.length">
+      Nenhum pedido {{ abaAtiva === 'finalizado' ? 'finalizado' : 'cancelado' }}.
     </div>
 
     <div class="paginacao-preparando" *ngIf="totalPaginas > 1">
