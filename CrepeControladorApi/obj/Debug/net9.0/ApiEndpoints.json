@@ -229,5 +229,69 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "ListarPedidosAbertos",
+    "RelativePath": "api/Pedidos/abertos",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "tipoPedido",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "BuscarPedidos",
+    "RelativePath": "api/Pedidos/buscar",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "termo",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "ListarPorGrupoStatus",
+    "RelativePath": "api/Pedidos/grupo-status",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "grupo",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "PesquisarPedidos",
+    "RelativePath": "api/Pedidos/pesquisar",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "termo",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

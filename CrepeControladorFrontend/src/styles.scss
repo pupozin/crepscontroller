@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  --cor-primaria: #634c34;
+  --cor-primaria-escura: #4a3625;
+  --cor-secundaria: #d4a574;
+  --cor-branca: #f8f5f0;
+  --cor-cinza: #dfdfdf;
+  --bs-primary: #634c34;
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: var(--cor-primaria);
+  color: var(--cor-branca);
+}
+
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 22px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 260px;
+  max-width: 90%;
+  z-index: 99999;
+  animation: fadeInUp 0.3s ease;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.toast i {
+  font-size: 20px;
+}
+
+.toast.sucesso {
+  border-left: 6px solid #00c851;
+}
+
+.toast.sucesso i {
+  color: #00c851;
+}
+
+.toast.erro {
+  border-left: 6px solid #ff4444;
+}
+
+.toast.erro i {
+  color: #ff4444;
+}
+
+.toast-bar {
+  height: 4px;
+  width: 100%;
+  border-radius: 0 0 10px 10px;
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: currentColor;
+  transform-origin: left;
+  animation: diminuir 3s linear forwards;
+}
+
+.toast.sucesso .toast-bar::after {
+  color: #00c851;
+}
+
+.toast.erro .toast-bar::after {
+  color: #ff4444;
+}
+
+@keyframes diminuir {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 40px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

@@ -161,7 +161,7 @@ namespace CrepeControladorApi.Services
             }
         }
 
-        private static void AddParameter(DbCommand command, string name, object? value)
+        protected static void AddParameter(DbCommand command, string name, object? value)
         {
             var parameter = command.CreateParameter();
             parameter.ParameterName = name;

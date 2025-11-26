@@ -1,0 +1,211 @@
+<div class="pedidos-abertos-container container py-4">
+  <div class="pedidos-loading-overlay" *ngIf="carregando">
+    <div class="pedidos-spinner"></div>
+    <p>Carregando pedidos...</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" [class.active]="abaAtiva === 'resumo'" (click)="selecionarAba('resumo')">
+      Resumo
+    </button>
+    <button class="tab" [class.active]="abaAtiva === 'tipos'" (click)="selecionarAba('tipos')">
+      Por tipo
+    </button>
+  </div>
+
+  <div *ngIf="abaAtiva === 'resumo'" class="aba-resumo">
+    <h2 class="titulo">Pedidos abertos: {{ pedidosAbertos.length }}</h2>
+
+    <div class="status-grid">
+      <section>
+        <header>
+          <span>Preparando</span>
+          <small>{{ pedidosPreparando.length }}</small>
+        </header>
+        <div class="cards-container">
+          <div class="estado-vazio" *ngIf="!pedidosPreparando.length">
+            Nenhum pedido preparando.
+          </div>
+          <div *ngFor="let pedido of pedidosPreparando" class="card-processo">
+            <div class="card-header">
+              <h4>{{ pedido.codigo }}</h4>
+              <span class="status">
+                <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+                {{ pedido.status }}
+              </span>
+            </div>
+            <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
+            <p><i class="fa-solid fa-motorcycle"></i> {{ pedido.tipoPedido }}</p>
+            <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
+            <p><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
+            <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <header>
+          <span>Pronto</span>
+          <small>{{ pedidosProntos.length }}</small>
+        </header>
+        <div class="cards-container">
+          <div class="estado-vazio" *ngIf="!pedidosProntos.length">
+            Nenhum pedido pronto.
+          </div>
+          <div *ngFor="let pedido of pedidosProntos" class="card-processo">
+            <div class="card-header">
+              <h4>{{ pedido.codigo }}</h4>
+              <span class="status">
+                <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+                {{ pedido.status }}
+              </span>
+            </div>
+            <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
+            <p><i class="fa-solid fa-motorcycle"></i> {{ pedido.tipoPedido }}</p>
+            <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
+            <p><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
+            <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div *ngIf="abaAtiva === 'tipos'" class="aba-tipos">
+    <div class="abas-internas">
+      <button
+        *ngFor="let tipo of tiposPedido"
+        [class.active]="tipoAtivo === tipo"
+        (click)="selecionarTipo(tipo)"
+      >
+        {{ tipo }} ({{ contagemTipo(tipo) }})
+      </button>
+    </div>
+
+    <div class="lista-processos" *ngIf="pedidosPorTipo[tipoAtivo]?.length">
+      <div *ngFor="let pedido of pedidosPorTipo[tipoAtivo]" class="linha-processo">
+        <span class="codigo">{{ pedido.codigo }}</span>
+        <span class="status">
+          <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+          {{ pedido.status }}
+        </span>
+        <span><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</span>
+        <span><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+        <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
+        <button class="btn-acao" (click)="finalizarPedidoDireto(pedido)" [disabled]="acaoRapidaEmExecucao">
+          Finalizar pedido
+        </button>
+      </div>
+    </div>
+
+    <div class="estado-vazio" *ngIf="!pedidosPorTipo[tipoAtivo]?.length">
+      <p *ngIf="estaCarregandoTipo(tipoAtivo)">Carregando pedidos de {{ tipoAtivo }}...</p>
+      <p *ngIf="!estaCarregandoTipo(tipoAtivo)">Nenhum pedido encontrado para {{ tipoAtivo }}.</p>
+    </div>
+  </div>
+
+  <div class="modal-overlay-detalhe" *ngIf="modalDetalhesAberto" (click)="fecharModalDetalhes()">
+    <div class="modal-detalhes" (click)="$event.stopPropagation()">
+      <button class="btn-fechar" (click)="fecharModalDetalhes()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+
+      <div *ngIf="carregandoDetalhes" class="modal-loading">
+        <div class="pedidos-spinner"></div>
+        <p>Carregando pedido...</p>
+      </div>
+
+      <ng-container *ngIf="!carregandoDetalhes && pedidoSelecionado as pedido">
+        <h2>{{ pedido.codigo }}</h2>
+
+        <div class="modal-campos">
+          <div>
+            <label>Cliente</label>
+            <input
+              type="text"
+              [(ngModel)]="pedidoFormulario.cliente"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Nome do cliente"
+            />
+          </div>
+
+          <div>
+            <label>Tipo do pedido</label>
+            <select
+              [(ngModel)]="pedidoFormulario.tipoPedido"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option *ngFor="let tipo of tiposPedido" [value]="tipo">{{ tipo }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Status</label>
+            <select
+              [(ngModel)]="pedidoFormulario.status"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option *ngFor="let status of statusAbertos" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Observacao</label>
+            <textarea
+              [(ngModel)]="pedidoFormulario.observacao"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Sem observacoes"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="lista-itens lista-itens-form">
+          <h3>Itens do pedido</h3>
+          <div class="item item-form" *ngFor="let item of pedidoFormulario.itens; let i = index">
+            <select
+              [(ngModel)]="item.itemId"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option [ngValue]="null" disabled>Selecione um item</option>
+              <option *ngFor="let disponivel of itensDisponiveis" [ngValue]="disponivel.id">
+                {{ disponivel.nome }} - {{ disponivel.preco | currency:'BRL':'symbol':'1.2-2' }}
+              </option>
+            </select>
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="item.quantidade"
+              [ngModelOptions]="{ standalone: true }"
+            />
+            <button type="button" class="btn-remover" (click)="removerItem(i)">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+
+          <div class="estado-vazio" *ngIf="!pedidoFormulario.itens.length">
+            Nenhum item adicionado.
+          </div>
+
+          <button class="btn-adicionar" type="button" (click)="adicionarItem()">Adicionar item</button>
+        </div>
+
+        <div class="mensagem-erro" *ngIf="mensagemFormulario">
+          {{ mensagemFormulario }}
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-cancelar" (click)="fecharModalDetalhes()">Fechar</button>
+          <button class="btn-concluir" (click)="salvarEdicoesPedido()" [disabled]="salvandoPedido">
+            {{ salvandoPedido ? 'Salvando...' : 'Salvar' }}
+          </button>
+          <button class="btn-finalizar" (click)="finalizarPedido('Finalizado')" [disabled]="salvandoPedido">
+            Finalizar pedido
+          </button>
+          <button class="btn-cancelar-status" (click)="finalizarPedido('Cancelado')" [disabled]="salvandoPedido">
+            Cancelar pedido
+          </button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,112 @@
+<div class="pedidos-fechados-container container py-4">
+  <div class="pedidos-loading-overlay" *ngIf="carregando">
+    <div class="pedidos-spinner"></div>
+    <p>Carregando pedidos...</p>
+  </div>
+
+  <h2 class="titulo">Pedidos fechados: {{ pedidosFechados.length }}</h2>
+
+  <div class="status-grid">
+    <section>
+      <header>
+        <span>Finalizados</span>
+        <small>{{ pedidosFinalizados.length }}</small>
+      </header>
+      <div class="cards-container">
+        <div class="estado-vazio" *ngIf="!pedidosFinalizados.length">
+          Nenhum pedido finalizado.
+        </div>
+        <div *ngFor="let pedido of pedidosFinalizados" class="card-processo">
+          <div class="card-header">
+            <h4>{{ pedido.codigo }}</h4>
+            <span class="status">
+              <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+              {{ pedido.status }}
+            </span>
+          </div>
+          <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
+          <p><i class="fa-solid fa-motorcycle"></i> {{ pedido.tipoPedido }}</p>
+          <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
+          <p><i class="fa-solid fa-calendar-check"></i> Conclusao {{ formatarData(pedido.dataConclusao) }}</p>
+          <p><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
+          <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <header>
+        <span>Cancelados</span>
+        <small>{{ pedidosCancelados.length }}</small>
+      </header>
+      <div class="cards-container">
+        <div class="estado-vazio" *ngIf="!pedidosCancelados.length">
+          Nenhum pedido cancelado.
+        </div>
+        <div *ngFor="let pedido of pedidosCancelados" class="card-processo">
+          <div class="card-header">
+            <h4>{{ pedido.codigo }}</h4>
+            <span class="status">
+              <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+              {{ pedido.status }}
+            </span>
+          </div>
+          <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
+          <p><i class="fa-solid fa-motorcycle"></i> {{ pedido.tipoPedido }}</p>
+          <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
+          <p><i class="fa-solid fa-calendar-check"></i> Atualizado {{ formatarData(pedido.dataConclusao) }}</p>
+          <p><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
+          <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-overlay-detalhe" *ngIf="modalDetalhesAberto" (click)="fecharModalDetalhes()">
+    <div class="modal-detalhes" (click)="$event.stopPropagation()">
+      <button class="btn-fechar" (click)="fecharModalDetalhes()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+
+      <div *ngIf="carregandoDetalhes" class="modal-loading">
+        <div class="pedidos-spinner"></div>
+        <p>Carregando pedido...</p>
+      </div>
+
+      <ng-container *ngIf="!carregandoDetalhes && pedidoSelecionado as pedido">
+        <h2>{{ pedido.codigo }}</h2>
+        <div class="status-row">
+          <span class="status">
+            <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+            {{ pedido.status }}
+          </span>
+          <span class="tipo">{{ pedido.tipoPedido }}</span>
+        </div>
+
+        <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
+        <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
+        <p><i class="fa-solid fa-calendar-check"></i> Encerrado {{ formatarData(pedido.dataConclusao) }}</p>
+        <p><i class="fa-solid fa-comment"></i> {{ pedido.observacao || 'Sem observacoes.' }}</p>
+        <p class="valor-total">
+          <i class="fa-solid fa-coins"></i>
+          Total: {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}
+        </p>
+
+        <div class="lista-itens">
+          <h3>Itens do pedido</h3>
+          <div class="item" *ngFor="let item of pedido.itens">
+            <div>
+              <strong>{{ item.nomeItem }}</strong>
+              <p>{{ item.quantidade }} x {{ item.precoUnitario | currency:'BRL':'symbol':'1.2-2' }}</p>
+            </div>
+            <span>{{ item.totalItem | currency:'BRL':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="estado-vazio" *ngIf="pedido.itens.length === 0">
+            Nenhum item cadastrado para este pedido.
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

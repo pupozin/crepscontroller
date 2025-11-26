@@ -1,0 +1,125 @@
+<header class="header-page" [class.shifted]="menuAberto">
+  <div class="menu-toggle" (click)="toggleMenu()">
+    <i class="fa-solid fa-bars"></i>
+  </div>
+
+  <a class="logo" routerLink="/">
+    <span class="logo-text">Crep's Fael</span>
+  </a>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      class="search-bar__input"
+      placeholder="Pesquisar pedido"
+      aria-label="Pesquisar pedido"
+      [(ngModel)]="termoBusca"
+      (keyup.enter)="buscarGlobal()"
+    />
+    <i class="fa-solid fa-magnifying-glass search-bar__icon" aria-hidden="true"></i>
+  </div>
+
+  <div class="modal-overlay" *ngIf="modalBuscaAberto" (click)="fecharModalBusca()">
+    <div class="modal-busca" (click)="$event.stopPropagation()">
+      <h2>Resultados da busca</h2>
+
+      <div *ngIf="carregandoBusca" class="loading">
+        <p>Buscando...</p>
+      </div>
+
+      <div *ngIf="!carregandoBusca && resultadosBusca.length === 0">
+        <p>Nenhum pedido encontrado.</p>
+      </div>
+
+      <div class="resultados-container">
+        <div *ngFor="let p of resultadosBusca" class="card-processo" (click)="abrirDetalhes(p)">
+          <h4>{{ p.codigo }}</h4>
+          <p><i class="fa-solid fa-user"></i> {{ p.cliente || 'Balcao' }}</p>
+          <p><i class="fa-solid fa-motorcycle"></i> {{ p.tipoPedido }}</p>
+          <p><i class="fa-solid fa-circle"></i> {{ p.status }}</p>
+          <p><i class="fa-solid fa-coins"></i> {{ p.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-create-process">
+    <button class="btn" (click)="abrirModalCriar()">Criar Pedido</button>
+  </div>
+</header>
+
+<nav class="sidebar" [class.open]="menuAberto">
+  <ul>
+    <li><a routerLink="/abertos" (click)="closeMenu()">Pedidos abertos</a></li>
+    <li><a routerLink="/fechados" (click)="closeMenu()">Pedidos fechados</a></li>
+  </ul>
+</nav>
+
+<div class="overlay" [class.show]="menuAberto" (click)="closeMenu()"></div>
+
+<div class="modal-overlay" *ngIf="modalCriarAberto" (click)="fecharModalCriar()">
+  <div class="modal-criar" (click)="$event.stopPropagation()">
+    <h2>Novo pedido</h2>
+
+    <label>Cliente (opcional)</label>
+    <input type="text" [(ngModel)]="novoPedido.cliente" placeholder="Nome do cliente" />
+
+    <label>Tipo do pedido</label>
+    <select [(ngModel)]="novoPedido.tipoPedido">
+      <option *ngFor="let tipo of tiposPedido" [value]="tipo">{{ tipo }}</option>
+    </select>
+
+    <label>Observacao</label>
+    <textarea [(ngModel)]="novoPedido.observacao" placeholder="Detalhes para a cozinha"></textarea>
+
+    <div class="itens-pedido">
+      <label>Itens do pedido</label>
+      <div class="item-row" *ngFor="let item of novoPedido.itens; let i = index">
+        <select [(ngModel)]="item.itemId" [ngModelOptions]="{ standalone: true }">
+          <option [ngValue]="null" disabled>Selecione um item</option>
+          <option *ngFor="let disponivel of itensDisponiveis" [ngValue]="disponivel.id">
+            {{ disponivel.nome }} - {{ disponivel.preco | currency:'BRL':'symbol':'1.2-2' }}
+          </option>
+        </select>
+        <input
+          type="number"
+          min="1"
+          [(ngModel)]="item.quantidade"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Qtd."
+        />
+        <button class="btn-remover" type="button" (click)="removerItem(i)">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+
+      <button class="btn-adicionar" type="button" (click)="adicionarItem()">Adicionar item</button>
+      <div class="info-itens" *ngIf="carregandoItens">Carregando itens disponiveis...</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" (click)="fecharModalCriar()">Cancelar</button>
+      <button class="btn-concluir" (click)="criarPedido()" [disabled]="carregandoCriacao">
+        {{ carregandoCriacao ? 'Salvando...' : 'Criar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  class="toast"
+  *ngIf="toast.visivel"
+  [ngClass]="toast.tipo"
+>
+  <div class="toast-content">
+    <i
+      class="fa-solid"
+      [ngClass]="{
+        'fa-check-circle': toast.tipo === 'sucesso',
+        'fa-times-circle': toast.tipo === 'erro'
+      }"
+    ></i>
+    <span>{{ toast.mensagem }}</span>
+  </div>
+  <div class="toast-bar"></div>
+</div>

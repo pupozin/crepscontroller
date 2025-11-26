@@ -1,0 +1,10 @@
+.main-wrapper {
+  margin-top: 120px;
+  transition: margin-left 0.4s ease;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.main-wrapper.shifted {
+  margin-left: 250px;
+}

@@ -362,6 +362,90 @@
           }
         }
       }
+    },
+    "/api/Pedidos/pesquisar": {
+      "get": {
+        "tags": [
+          "Pedidos"
+        ],
+        "parameters": [
+          {
+            "name": "termo",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Pedidos/abertos": {
+      "get": {
+        "tags": [
+          "Pedidos"
+        ],
+        "parameters": [
+          {
+            "name": "tipoPedido",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Pedidos/grupo-status": {
+      "get": {
+        "tags": [
+          "Pedidos"
+        ],
+        "parameters": [
+          {
+            "name": "grupo",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Pedidos/buscar": {
+      "get": {
+        "tags": [
+          "Pedidos"
+        ],
+        "parameters": [
+          {
+            "name": "termo",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -414,16 +498,10 @@
       },
       "PedidoCreateDto": {
         "required": [
-          "codigo",
           "tipoPedido"
         ],
         "type": "object",
         "properties": {
-          "codigo": {
-            "maxLength": 20,
-            "minLength": 0,
-            "type": "string"
-          },
           "cliente": {
             "maxLength": 100,
             "minLength": 0,
@@ -473,17 +551,11 @@
       },
       "PedidoUpdateDto": {
         "required": [
-          "codigo",
           "status",
           "tipoPedido"
         ],
         "type": "object",
         "properties": {
-          "codigo": {
-            "maxLength": 20,
-            "minLength": 0,
-            "type": "string"
-          },
           "cliente": {
             "maxLength": 100,
             "minLength": 0,

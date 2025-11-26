@@ -5,6 +5,7 @@ using System.Linq;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
 using CrepeControladorApi.Models;
+using CrepeControladorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +16,12 @@ namespace CrepeControladorApi.Controllers
     public class PedidosController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly PedidoQueryService _pedidoQueryService;
 
-        public PedidosController(AppDbContext context)
+        public PedidosController(AppDbContext context, PedidoQueryService pedidoQueryService)
         {
             _context = context;
+            _pedidoQueryService = pedidoQueryService;
         }
 
         [HttpGet]
@@ -62,6 +65,42 @@ namespace CrepeControladorApi.Controllers
                 pedido.ValorTotal,
                 Itens = itens
             });
+        }
+
+        [HttpGet("pesquisar")]
+        public async Task<IActionResult> PesquisarPedidos([FromQuery] string termo)
+        {
+            if (string.IsNullOrWhiteSpace(termo))
+            {
+                return BadRequest("Informe um termo para pesquisa.");
+            }
+
+            var pedidos = await _pedidoQueryService.PesquisarPedidosAsync(termo.Trim());
+            return Ok(pedidos);
+        }
+
+        [HttpGet("abertos")]
+        public async Task<IActionResult> ListarPedidosAbertos([FromQuery] string tipoPedido)
+        {
+            if (string.IsNullOrWhiteSpace(tipoPedido))
+            {
+                return BadRequest("Informe o tipo de pedido.");
+            }
+
+            var pedidos = await _pedidoQueryService.ListarPedidosAbertosPorTipoAsync(tipoPedido);
+            return Ok(pedidos);
+        }
+
+        [HttpGet("grupo-status")]
+        public async Task<IActionResult> ListarPorGrupoStatus([FromQuery] string grupo)
+        {
+            if (string.IsNullOrWhiteSpace(grupo))
+            {
+                return BadRequest("Informe o grupo de status.");
+            }
+
+            var pedidos = await _pedidoQueryService.ListarPorGrupoStatusAsync(grupo.ToUpperInvariant());
+            return Ok(pedidos);
         }
 
         [HttpPost]
@@ -160,6 +199,8 @@ namespace CrepeControladorApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
+            var estavaAberto = StatusPermiteAlteracao(pedido.Status);
+
             pedido.Cliente = pedidoDto.Cliente;
             pedido.TipoPedido = pedidoDto.TipoPedido;
             pedido.Status = pedidoDto.Status;
@@ -200,6 +241,11 @@ namespace CrepeControladorApi.Controllers
 
             pedido.ValorTotal = valorTotal;
 
+            if (estavaAberto && StatusIndicaFechado(pedido.Status))
+            {
+                pedido.DataConclusao = DateTime.Now;
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -221,6 +267,12 @@ namespace CrepeControladorApi.Controllers
         {
             return string.Equals(status, "Preparando", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(status, "Pronto", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool StatusIndicaFechado(string status)
+        {
+            return string.Equals(status, "Finalizado", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(status, "Cancelado", StringComparison.OrdinalIgnoreCase);
         }
 
         private async Task<string> GerarCodigoPedidoAsync()
@@ -282,6 +334,16 @@ namespace CrepeControladorApi.Controllers
             }
 
             return itens;
+        }
+
+        [HttpGet("buscar")]
+        public async Task<IActionResult> BuscarPedidos([FromQuery] string termo)
+        {
+            var pedidos = await _context.Pedidos
+                .FromSqlRaw("EXEC dbo.sp_PesquisarPedidos @Termo = {0}", termo)
+                .ToListAsync();
+
+            return Ok(pedidos);
         }
     }
 }
