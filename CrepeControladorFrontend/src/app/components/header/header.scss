@@ -26,7 +26,7 @@
 }
 
 .logo-text {
-  font-size: 23px;
+  font-size: clamp(20px, 4vw, 23px);
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--cor-branca);
@@ -37,7 +37,8 @@
      background-color: var(--cor-branca);
      color: var(--cor-primaria);
      width: min(220px, 45vw);
-     padding: 12px 0 12px 0;
+     padding: clamp(10px, 3vw, 12px) 0;
+     font-size: clamp(14px, 3.6vw, 16px);
 }
 
 .btn-create-process{
@@ -70,12 +71,12 @@
 
 .search-bar__input {
   width: min(620px, 45vw);
-  padding: 12px 44px 12px 20px;
+  padding: clamp(10px, 3vw, 12px) 44px clamp(10px, 3vw, 12px) 20px;
   border: none;
   border-radius: 999px;
   background-color: var(--cor-primaria);
   color: var(--cor-branca);
-  font-size: 1rem;
+  font-size: clamp(0.95rem, 3.5vw, 1rem);
   outline: 2px solid var(--cor-branca);
   outline-offset: 0;
   transition: outline-color 0.2s ease, background-color 0.2s ease;
@@ -507,6 +508,7 @@
   .sidebar {
     top: 0;
     left: 0;
+    position: absolute;
     width: 100%;
     height: 100vh;
     border-radius: 0;
