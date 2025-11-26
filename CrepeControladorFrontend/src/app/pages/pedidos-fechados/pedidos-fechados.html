@@ -4,62 +4,66 @@
     <p>Carregando pedidos...</p>
   </div>
 
-  <h2 class="titulo">Pedidos fechados: {{ pedidosFechados.length }}</h2>
+  <div class="tabs">
+    <button class="tab" [class.active]="abaAtiva === 'resumo'" (click)="selecionarAba('resumo')">
+      Resumo
+    </button>
+  </div>
 
-  <div class="status-grid">
-    <section>
-      <header>
-        <span>Finalizados</span>
-        <small>{{ pedidosFinalizados.length }}</small>
-      </header>
-      <div class="cards-container">
-        <div class="estado-vazio" *ngIf="!pedidosFinalizados.length">
-          Nenhum pedido finalizado.
-        </div>
-        <div *ngFor="let pedido of pedidosFinalizados" class="card-processo">
-          <div class="card-header">
-            <h4>{{ pedido.codigo }}</h4>
-            <span class="status">
-              <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
-              {{ pedido.status }}
-            </span>
-          </div>
-          <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
-          <p><i class="fa-solid fa-motorcycle"></i> {{ pedido.tipoPedido }}</p>
-          <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
-          <p><i class="fa-solid fa-calendar-check"></i> Conclusao {{ formatarData(pedido.dataConclusao) }}</p>
-          <p><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
-          <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
-        </div>
-      </div>
-    </section>
+  <div *ngIf="abaAtiva === 'resumo'" class="aba-tipos">
+    <div class="abas-internas">
+      <button class="active">
+        Resumo ({{ pedidosFechados.length }})
+      </button>
+    </div>
 
-    <section>
-      <header>
-        <span>Cancelados</span>
-        <small>{{ pedidosCancelados.length }}</small>
-      </header>
-      <div class="cards-container">
-        <div class="estado-vazio" *ngIf="!pedidosCancelados.length">
-          Nenhum pedido cancelado.
-        </div>
-        <div *ngFor="let pedido of pedidosCancelados" class="card-processo">
-          <div class="card-header">
-            <h4>{{ pedido.codigo }}</h4>
-            <span class="status">
-              <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
-              {{ pedido.status }}
-            </span>
-          </div>
-          <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
-          <p><i class="fa-solid fa-motorcycle"></i> {{ pedido.tipoPedido }}</p>
-          <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
-          <p><i class="fa-solid fa-calendar-check"></i> Atualizado {{ formatarData(pedido.dataConclusao) }}</p>
-          <p><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</p>
-          <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
-        </div>
+    <div class="lista-processos" *ngIf="pedidosFechados.length">
+      <div *ngFor="let pedido of pedidosVisiveis" class="linha-processo">
+        <span class="codigo">{{ pedido.codigo }}</span>
+        <span class="status">
+          <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+          {{ pedido.status }}
+        </span>
+        <span><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</span>
+        <span><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+        <button class="btn-acao" type="button" (click)="abrirDetalhes(pedido)">Ver recibo</button>
       </div>
-    </section>
+    </div>
+
+    <div class="estado-vazio" *ngIf="!pedidosFechados.length">
+      Nenhum pedido fechado.
+    </div>
+
+    <div class="paginacao-preparando" *ngIf="totalPaginas > 1">
+      <button
+        type="button"
+        class="paginacao-nav"
+        (click)="alterarPagina(-1)"
+        [disabled]="paginaAtual === 1"
+      >
+        <span aria-hidden="true">&larr;</span>
+        <span class="sr-only">Pagina anterior</span>
+      </button>
+      <div class="paginacao-dots">
+        <button
+          type="button"
+          class="paginacao-dot"
+          *ngFor="let pagina of paginasCarousel"
+          [class.active]="pagina === paginaAtual"
+          (click)="irParaPagina(pagina)"
+          [attr.aria-label]="'Ir para pagina ' + pagina"
+        ></button>
+      </div>
+      <button
+        type="button"
+        class="paginacao-nav"
+        (click)="alterarPagina(1)"
+        [disabled]="paginaAtual === totalPaginas"
+      >
+        <span aria-hidden="true">&rarr;</span>
+        <span class="sr-only">Proxima pagina</span>
+      </button>
+    </div>
   </div>
 
   <div class="modal-overlay-detalhe" *ngIf="modalDetalhesAberto" (click)="fecharModalDetalhes()">

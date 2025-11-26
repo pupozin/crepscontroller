@@ -4,6 +4,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PedidoDetalhe, PedidoResumo, PedidoService } from '../../services/pedido.service';
 
+type AbaFechados = 'resumo';
+
 @Component({
   selector: 'app-pedidos-fechados',
   standalone: true,
@@ -12,9 +14,10 @@ import { PedidoDetalhe, PedidoResumo, PedidoService } from '../../services/pedid
   styleUrls: ['./pedidos-fechados.scss']
 })
 export class PedidosFechados implements OnInit, OnDestroy {
+  abaAtiva: AbaFechados = 'resumo';
   pedidosFechados: PedidoResumo[] = [];
-  pedidosFinalizados: PedidoResumo[] = [];
-  pedidosCancelados: PedidoResumo[] = [];
+  readonly pedidosPorPagina = 10;
+  paginaAtual = 1;
 
   carregando = false;
   modalDetalhesAberto = false;
@@ -49,6 +52,10 @@ export class PedidosFechados implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  selecionarAba(aba: AbaFechados): void {
+    this.abaAtiva = aba;
   }
 
   abrirDetalhes(pedido: PedidoResumo): void {
@@ -90,24 +97,45 @@ export class PedidosFechados implements OnInit, OnDestroy {
     return pedido.cliente || 'Balcao';
   }
 
+  get totalPaginas(): number {
+    return Math.ceil(this.pedidosFechados.length / this.pedidosPorPagina);
+  }
+
+  get pedidosVisiveis(): PedidoResumo[] {
+    if (!this.pedidosFechados.length) {
+      return [];
+    }
+    const inicio = (this.paginaAtual - 1) * this.pedidosPorPagina;
+    return this.pedidosFechados.slice(inicio, inicio + this.pedidosPorPagina);
+  }
+
+  get paginasCarousel(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, index) => index + 1);
+  }
+
+  irParaPagina(pagina: number): void {
+    if (pagina < 1 || pagina > this.totalPaginas) {
+      return;
+    }
+    this.paginaAtual = pagina;
+  }
+
+  alterarPagina(delta: number): void {
+    this.irParaPagina(this.paginaAtual + delta);
+  }
+
   private carregarPedidosFechados(): void {
     this.carregando = true;
     this.pedidoService.listarPorGrupoStatus('FECHADOS').subscribe({
       next: (pedidos) => {
         this.pedidosFechados = pedidos;
-        this.pedidosFinalizados = pedidos.filter(
-          (pedido) => this.normalizarStatus(pedido.status) === 'finalizado'
-        );
-        this.pedidosCancelados = pedidos.filter(
-          (pedido) => this.normalizarStatus(pedido.status) === 'cancelado'
-        );
+        this.ajustarPaginaAtual();
         this.carregando = false;
       },
       error: (err) => {
         console.error('Erro ao listar pedidos fechados', err);
         this.pedidosFechados = [];
-        this.pedidosFinalizados = [];
-        this.pedidosCancelados = [];
+        this.ajustarPaginaAtual();
         this.carregando = false;
       }
     });
@@ -133,7 +161,17 @@ export class PedidosFechados implements OnInit, OnDestroy {
     });
   }
 
-  private normalizarStatus(status?: string): string {
-    return (status ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  private ajustarPaginaAtual(): void {
+    if (!this.pedidosFechados.length) {
+      this.paginaAtual = 1;
+      return;
+    }
+    const total = this.totalPaginas || 1;
+    if (this.paginaAtual > total) {
+      this.paginaAtual = total;
+    }
+    if (this.paginaAtual < 1) {
+      this.paginaAtual = 1;
+    }
   }
 }

@@ -86,16 +86,15 @@ export class PedidosAbertos implements OnInit, OnDestroy {
 
   selecionarAba(aba: AbaPedidos): void {
     this.abaAtiva = aba;
-    if (aba === 'tipos' && !this.pedidosPorTipo[this.tipoAtivo]) {
-      this.carregarPedidosPorTipo(this.tipoAtivo);
+    if (aba === 'tipos') {
+      this.carregarPedidosPorTipoSeNecessario(this.tipoAtivo);
+      this.tiposPedido.forEach((tipo) => this.carregarPedidosPorTipoSeNecessario(tipo));
     }
   }
 
   selecionarTipo(tipo: string): void {
     this.tipoAtivo = tipo;
-    if (!this.pedidosPorTipo[tipo]) {
-      this.carregarPedidosPorTipo(tipo);
-    }
+    this.carregarPedidosPorTipoSeNecessario(tipo);
   }
 
   abrirDetalhes(pedido: PedidoResumo): void {
@@ -207,6 +206,12 @@ export class PedidosAbertos implements OnInit, OnDestroy {
         this.tiposCarregando[tipo] = false;
       }
     });
+  }
+
+  private carregarPedidosPorTipoSeNecessario(tipo: string): void {
+    if (!this.pedidosPorTipo[tipo] && !this.tiposCarregando[tipo]) {
+      this.carregarPedidosPorTipo(tipo);
+    }
   }
 
   adicionarItem(): void {
