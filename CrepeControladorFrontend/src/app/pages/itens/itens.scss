@@ -19,6 +19,8 @@
     gap: 8px;
     background-color: var(--cor-branca);
     border-radius: 20px;
+    font-size: clamp(14px, 3.5vw, 16px);
+    padding: clamp(8px, 2.5vw, 10px) clamp(16px, 4vw, 20px);
   }
 }
 
@@ -39,7 +41,18 @@
   input[type='number'] {
     border: 1px solid #ddd;
     border-radius: 12px;
-    padding: 10px 14px;
+    padding: clamp(8px, 2.5vw, 10px) 14px;
     background: #f7f7f7;
+  }
+}
+
+@media (max-width: 850px) {
+  .acoes-aba {
+    margin: 0 0 15px;
+    right: 15px;
+  }
+
+  .tab{
+    width: 100px !important;
   }
 }

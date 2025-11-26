@@ -148,7 +148,9 @@
 
 .lista-processos {
   border-radius: 20px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 6px;
 }
 
 .linha-processo {
@@ -456,7 +458,7 @@
   .pedidos-abertos-container {
   padding: 0px 0 0px;
   width: 110% !important;
-  margin-left: -10px;  
+  margin-left: -12px;  
 }
 
 .tabs {
@@ -471,4 +473,8 @@
   background-color: var(--cor-primaria);
 }
 
+}
+
+.lista-processos .linha-processo {
+  min-width: 640px;
 }
