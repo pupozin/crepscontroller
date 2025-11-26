@@ -53,15 +53,10 @@
         <span aria-hidden="true">&larr;</span>
         <span class="sr-only">Pagina anterior</span>
       </button>
-      <div class="paginacao-dots">
-        <button
-          type="button"
-          class="paginacao-dot"
-          *ngFor="let pagina of paginasCarousel"
-          [class.active]="pagina === paginaAtual"
-          (click)="irParaPagina(pagina)"
-          [attr.aria-label]="'Ir para pagina ' + pagina"
-        ></button>
+      <div class="paginacao-indicador">
+        <span>{{ paginaAtual }}</span>
+        <span>de</span>
+        <span>{{ totalPaginas }}</span>
       </div>
       <button
         type="button"

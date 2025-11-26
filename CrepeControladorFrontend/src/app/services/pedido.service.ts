@@ -41,6 +41,17 @@ export interface PedidoItemCreatePayload {
   quantidade: number;
 }
 
+export interface ItemCreatePayload {
+  nome: string;
+  preco: number;
+}
+
+export interface ItemUpdatePayload {
+  nome?: string;
+  preco?: number;
+  ativo?: boolean;
+}
+
 export interface PedidoCreatePayload {
   cliente?: string;
   tipoPedido: string;
@@ -99,6 +110,14 @@ export class PedidoService {
 
   listarItens(): Observable<PedidoItemSelecionavel[]> {
     return this.http.get<PedidoItemSelecionavel[]>(this.buildUrl('itens'));
+  }
+
+  criarItem(payload: ItemCreatePayload): Observable<PedidoItemSelecionavel> {
+    return this.http.post<PedidoItemSelecionavel>(this.buildUrl('itens'), payload);
+  }
+
+  atualizarItem(id: number, payload: ItemUpdatePayload): Observable<PedidoItemSelecionavel> {
+    return this.http.put<PedidoItemSelecionavel>(this.buildUrl(`itens/${id}`), payload);
   }
 
   notificarAtualizacao(): void {

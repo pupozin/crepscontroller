@@ -1,0 +1,133 @@
+<div class="pedidos-fechados-container container py-4">
+  <div class="pedidos-loading-overlay" *ngIf="carregando">
+    <div class="pedidos-spinner"></div>
+    <p>Carregando itens...</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" type="button">Itens</button>
+  </div>
+
+    <div class="acoes-aba">
+      <button class="btn-acao btn" type="button" (click)="abrirModalItem()">
+        <i class="fa-solid fa-plus"></i>
+        Adicionar item
+      </button>
+    </div>
+
+  <div class="aba-tipos">
+    <div class="abas-internas">
+      <button
+        type="button"
+        [class.active]="abaAtiva === 'ativos'"
+        (click)="selecionarAba('ativos')"
+      >
+        Ativos ({{ itensAtivos.length }})
+      </button>
+      <button
+        type="button"
+        [class.active]="abaAtiva === 'desativados'"
+        (click)="selecionarAba('desativados')"
+      >
+        Desativados ({{ itensInativos.length }})
+      </button>
+    </div>
+
+    
+
+    <div class="lista-processos" *ngIf="itensAtuais.length">
+      <div *ngFor="let item of itensVisiveis" class="linha-processo">
+        <span class="codigo">{{ item.nome }}</span>
+        <span><i class="fa-solid fa-tag"></i> #{{ item.id }}</span>
+        <span><i class="fa-solid fa-coins"></i> {{ item.preco | currency:'BRL':'symbol':'1.2-2' }}</span>
+        <span class="status">
+          <i class="fa-solid fa-circle" [style.color]="item.ativo ? '#0ea5e9' : '#ef4444'"></i>
+          {{ item.ativo ? 'Ativo' : 'Desativado' }}
+        </span>
+        <button class="btn-detalhes" type="button" (click)="abrirModalItem(item)">Editar</button>
+        <button
+          class="btn-acao"
+          type="button"
+          [disabled]="processandoToggle[item.id]"
+          (click)="alternarItem(item)"
+        >
+          {{ item.ativo ? 'Desativar' : 'Ativar' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="estado-vazio" *ngIf="!itensAtuais.length && !carregando">
+      Nenhum item {{ abaAtiva === 'ativos' ? 'ativo' : 'desativado' }}.
+    </div>
+
+    <div class="paginacao-preparando" *ngIf="totalPaginas > 1">
+      <button
+        type="button"
+        class="paginacao-nav"
+        (click)="alterarPagina(-1)"
+        [disabled]="paginaAtual === 1"
+      >
+        <span aria-hidden="true">&larr;</span>
+        <span class="sr-only">Pagina anterior</span>
+      </button>
+      <div class="paginacao-indicador">
+        <span>{{ paginaAtual }}</span>
+        <span>de</span>
+        <span>{{ totalPaginas }}</span>
+      </div>
+      <button
+        type="button"
+        class="paginacao-nav"
+        (click)="alterarPagina(1)"
+        [disabled]="paginaAtual === totalPaginas"
+      >
+        <span aria-hidden="true">&rarr;</span>
+        <span class="sr-only">Proxima pagina</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay-detalhe" *ngIf="modalItemAberto" (click)="fecharModalItem()">
+    <div class="modal-detalhes" (click)="$event.stopPropagation()">
+      <button class="btn-fechar" type="button" (click)="fecharModalItem()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+
+      <h2>{{ itemEmEdicao ? 'Editar item' : 'Novo item' }}</h2>
+
+      <label>Nome</label>
+      <input type="text" [(ngModel)]="novoItem.nome" placeholder="Crepe de chocolate" />
+
+      <label>Preco</label>
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        [(ngModel)]="novoItem.preco"
+        placeholder="0,00"
+      />
+
+      <div class="mensagem-erro" *ngIf="mensagemItem">
+        {{ mensagemItem }}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancelar" type="button" (click)="fecharModalItem()">Cancelar</button>
+        <button
+          class="btn-concluir"
+          type="button"
+          (click)="salvarItem()"
+          [disabled]="salvandoItem"
+        >
+          {{
+            salvandoItem
+              ? 'Salvando...'
+              : itemEmEdicao
+                ? 'Salvar alteracoes'
+                : 'Adicionar'
+          }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

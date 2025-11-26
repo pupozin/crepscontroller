@@ -120,10 +120,6 @@ export class PedidosFechados implements OnInit, OnDestroy {
     return this.pedidosAtuais.slice(inicio, inicio + this.pedidosPorPagina);
   }
 
-  get paginasCarousel(): number[] {
-    return Array.from({ length: this.totalPaginas }, (_, index) => index + 1);
-  }
-
   irParaPagina(pagina: number): void {
     if (pagina < 1 || pagina > this.totalPaginas) {
       return;

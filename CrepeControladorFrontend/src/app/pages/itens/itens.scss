@@ -1,0 +1,45 @@
+@use '../pedidos-fechados/pedidos-fechados';
+
+.pedidos-fechados-container .aba-tipos {
+  position: relative;
+}
+
+.acoes-aba {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  position: fixed;
+  margin-top: -110px !important;
+  right: 350px;
+  z-index: 99;
+
+  .btn-acao {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--cor-branca);
+    border-radius: 20px;
+  }
+}
+
+.linha-processo {
+  grid-template-columns: 1.4fr 0.8fr 0.8fr 0.9fr auto auto !important;
+}
+
+.modal-detalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  label {
+    font-weight: 600;
+  }
+
+  input[type='text'],
+  input[type='number'] {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 10px 14px;
+    background: #f7f7f7;
+  }
+}
