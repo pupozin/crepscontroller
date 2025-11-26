@@ -7,19 +7,27 @@
 
 .tabs {
   display: flex;
-  gap: 20px;
-  margin-bottom: 40px;
+  gap: 15px;
+  margin-bottom: 50px;
+  position: sticky;
+  margin-top: -130px;
+  top: 0;
+  z-index: 50;
+  height: 200px;
+  background-color: var(--cor-primaria);
 
   .tab {
     background: none;
     border: none;
     color: #fff;
     font-weight: 600;
-    font-size: 18px;
-    padding-bottom: 8px;
+    padding: 8px 12px;
     cursor: pointer;
     border-bottom: 3px solid transparent;
-    transition: border-color 0.3s ease;
+    transition: 0.3s;
+    font-size: 18px;
+    width: 200px;
+    padding-top: 150px;
 
     &.active {
       border-color: var(--cor-branca);
@@ -214,7 +222,8 @@
   position: relative;
 
   h2 {
-    margin: 0 0 10px;
+    margin: 0 0 20px;
+    font-size: 23px;
   }
 
   p {
@@ -278,6 +287,7 @@
 
   h3 {
     margin-bottom: 10px;
+    font-size: 20px;
   }
 
   .item {
