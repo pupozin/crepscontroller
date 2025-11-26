@@ -23,83 +23,6 @@ body {
   color: var(--cor-branca);
 }
 
-.toast {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  border-radius: 10px;
-  padding: 14px 22px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
-  color: #333;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 260px;
-  max-width: 90%;
-  z-index: 99999;
-  animation: fadeInUp 0.3s ease;
-}
-
-.toast-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.toast i {
-  font-size: 20px;
-}
-
-.toast.sucesso {
-  border-left: 6px solid #00c851;
-}
-
-.toast.sucesso i {
-  color: #00c851;
-}
-
-.toast.erro {
-  border-left: 6px solid #ff4444;
-}
-
-.toast.erro i {
-  color: #ff4444;
-}
-
-.toast-bar {
-  height: 4px;
-  width: 100%;
-  border-radius: 0 0 10px 10px;
-  margin-top: 10px;
-  background: rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.toast-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background: currentColor;
-  transform-origin: left;
-  animation: diminuir 3s linear forwards;
-}
-
-.toast.sucesso .toast-bar::after {
-  color: #00c851;
-}
-
-.toast.erro .toast-bar::after {
-  color: #ff4444;
-}
-
 @keyframes diminuir {
   from {
     transform: scaleX(1);
@@ -117,5 +40,88 @@ body {
   to {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 650px) {
+  .modal-criar,
+  .modal-detalhes,
+  .modal-busca
+   {
+    width: min(94vw, 420px);
+    padding: 18px 16px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+  }
+
+  .modal-criar h2,
+  .modal-detalhes h2,
+  .modal-busca h2{
+    font-size: 1.15rem;
+    margin-bottom: 14px;
+  }
+
+  .modal-criar label,
+  .modal-detalhes label{
+    font-size: 0.85rem;
+  }
+
+  .modal-criar input,
+  .modal-criar select,
+  .modal-criar textarea,
+  .modal-detalhes input,
+  .modal-detalhes select,
+  .modal-detalhes textarea,
+  .modal-detalhes .lista-itens select,
+  .modal-detalhes .lista-itens input,
+  .modal-busca input,
+  .modal-busca select,
+  .modal-busca textarea {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    min-height: 38px;
+  }
+
+  .modal-criar .item-row,
+  .modal-detalhes .modal-campos,
+  .modal-detalhes .item{
+    gap: 8px;
+  }
+
+  .modal-criar .btn-remover,
+  .modal-detalhes .btn-remover {
+    width: 30px;
+    height: 30px;
+  }
+
+  .modal-criar .btn-adicionar,
+  .modal-detalhes .btn-adicionar{
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .modal-criar .modal-actions,
+  .modal-detalhes .modal-actions{
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-criar .modal-actions button,
+  .modal-detalhes .modal-actions button,
+   .modal-actions button,
+  .modal-criar button.btn,
+  .modal-detalhes button.btn{
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    min-height: 38px;
+  }
+
+  .modal-busca .card-processo h4 {
+    font-size: 1rem;
+  }
+
+  .modal-busca .card-processo p {
+    font-size: 0.85rem;
   }
 }
