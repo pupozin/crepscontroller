@@ -1,5 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Inject,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -15,7 +23,7 @@ import {
   templateUrl: './header.html',
   styleUrl: './header.scss'
 })
-export class Header implements OnInit {
+export class Header implements OnInit, OnDestroy {
   @Output() readonly menuToggled = new EventEmitter<boolean>();
 
   menuAberto = false;
@@ -44,15 +52,33 @@ export class Header implements OnInit {
     tipo: ''
   };
 
-  constructor(private readonly pedidoService: PedidoService, private readonly router: Router) {}
+  constructor(
+    private readonly pedidoService: PedidoService,
+    private readonly router: Router,
+    @Inject(DOCUMENT) private readonly document: Document
+  ) {}
 
   ngOnInit(): void {
     this.carregarItens();
   }
 
+  ngOnDestroy(): void {
+    this.liberarScrollMobile();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (!this.menuAberto) {
+      this.liberarScrollMobile();
+      return;
+    }
+    this.aplicarComportamentoMenuMobile();
+  }
+
   toggleMenu(): void {
     this.menuAberto = !this.menuAberto;
     this.menuToggled.emit(this.menuAberto);
+    this.aplicarComportamentoMenuMobile();
   }
 
   closeMenu(): void {
@@ -61,6 +87,7 @@ export class Header implements OnInit {
     }
     this.menuAberto = false;
     this.menuToggled.emit(this.menuAberto);
+    this.aplicarComportamentoMenuMobile();
   }
 
   abrirModalCriar(): void {
@@ -157,6 +184,7 @@ export class Header implements OnInit {
     this.modalBuscaAberto = false;
     this.termoBusca = '';
     this.resultadosBusca = [];
+    this.aplicarComportamentoMenuMobile();
   }
 
   abrirDetalhes(pedido: PedidoResumo): void {
@@ -191,5 +219,34 @@ export class Header implements OnInit {
     setTimeout(() => {
       this.toast.visivel = false;
     }, 3000);
+  }
+
+  private aplicarComportamentoMenuMobile(): void {
+    if (!this.document) {
+      return;
+    }
+
+    if (!this.menuAberto) {
+      this.liberarScrollMobile();
+      return;
+    }
+
+    if (this.isMobileViewport()) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      this.document.body.classList.add('menu-mobile-bloqueado');
+    } else {
+      this.liberarScrollMobile();
+    }
+  }
+
+  private liberarScrollMobile(): void {
+    if (!this.document) {
+      return;
+    }
+    this.document.body.classList.remove('menu-mobile-bloqueado');
+  }
+
+  private isMobileViewport(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= 1050;
   }
 }
