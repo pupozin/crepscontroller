@@ -30,6 +30,21 @@ export interface DashboardHorarioPico {
   faturamento: number;
 }
 
+export interface DashboardDiaSemanaPico {
+  diaSemana: number;
+  nomeDia: string;
+  hora: number;
+  quantidadePedidos: number;
+  faturamento: number;
+}
+
+export interface DashboardDiaSemanaDistribuicao extends DashboardDiaSemanaPico {}
+
+export interface DashboardPeriodoTotal {
+  dataInicio: string | null;
+  dataFim: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -56,21 +71,26 @@ export class DadosService {
     });
   }
 
-  obterHorariosDiaSemana(diaSemana: number, ano?: number): Observable<DashboardHorarioPico[]> {
-    let params = new HttpParams().set('diaSemana', diaSemana);
-    if (ano) {
-      params = params.set('ano', ano);
-    }
-    return this.http.get<DashboardHorarioPico[]>(this.buildUrl('dashboard/horarios/dia-semana'), {
-      params
+  obterHorariosPeriodo(dataInicio: string, dataFim: string): Observable<DashboardHorarioPico[]> {
+    return this.http.get<DashboardHorarioPico[]>(this.buildUrl('dashboard/horarios/periodo'), {
+      params: this.buildPeriodoParams(dataInicio, dataFim)
     });
   }
 
-  obterHorariosMes(ano: number, mes: number): Observable<DashboardHorarioPico[]> {
-    const params = new HttpParams().set('ano', ano).set('mes', mes);
-    return this.http.get<DashboardHorarioPico[]>(this.buildUrl('dashboard/horarios/mes'), {
-      params
+  obterPicosDiaSemana(dataInicio: string, dataFim: string): Observable<DashboardDiaSemanaPico[]> {
+    return this.http.get<DashboardDiaSemanaPico[]>(this.buildUrl('dashboard/dia-semana/picos'), {
+      params: this.buildPeriodoParams(dataInicio, dataFim)
     });
+  }
+
+  obterDistribuicaoDiaSemana(dataInicio: string, dataFim: string): Observable<DashboardDiaSemanaDistribuicao[]> {
+    return this.http.get<DashboardDiaSemanaDistribuicao[]>(this.buildUrl('dashboard/dia-semana/distribuicao'), {
+      params: this.buildPeriodoParams(dataInicio, dataFim)
+    });
+  }
+
+  obterPeriodoTotal(): Observable<DashboardPeriodoTotal> {
+    return this.http.get<DashboardPeriodoTotal>(this.buildUrl('dashboard/periodo-total'));
   }
 
   private buildPeriodoParams(dataInicio: string, dataFim: string): HttpParams {

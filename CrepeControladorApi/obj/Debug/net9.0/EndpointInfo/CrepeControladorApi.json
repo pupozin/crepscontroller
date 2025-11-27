@@ -5,26 +5,26 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/Dashboard/horarios/dia-semana": {
+    "/api/Dashboard/horarios/periodo": {
       "get": {
         "tags": [
           "Dashboard"
         ],
         "parameters": [
           {
-            "name": "diaSemana",
+            "name": "dataInicio",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "date-time"
             }
           },
           {
-            "name": "ano",
+            "name": "dataFim",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -35,28 +35,70 @@
         }
       }
     },
-    "/api/Dashboard/horarios/mes": {
+    "/api/Dashboard/dia-semana/picos": {
       "get": {
         "tags": [
           "Dashboard"
         ],
         "parameters": [
           {
-            "name": "ano",
+            "name": "dataInicio",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "date-time"
             }
           },
           {
-            "name": "mes",
+            "name": "dataFim",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "date-time"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Dashboard/dia-semana/distribuicao": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "parameters": [
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Dashboard/periodo-total": {
+      "get": {
+        "tags": [
+          "Dashboard"
         ],
         "responses": {
           "200": {

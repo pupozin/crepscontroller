@@ -19,8 +19,10 @@ describe('Dados', () => {
       }),
     obterTipoPedido: () => of([]),
     obterItensRanking: () => of([]),
-    obterHorariosDiaSemana: () => of([]),
-    obterHorariosMes: () => of([])
+    obterHorariosPeriodo: () => of([]),
+    obterPicosDiaSemana: () => of([]),
+    obterDistribuicaoDiaSemana: () => of([]),
+    obterPeriodoTotal: () => of({ dataInicio: null, dataFim: null })
   };
 
   beforeEach(async () => {

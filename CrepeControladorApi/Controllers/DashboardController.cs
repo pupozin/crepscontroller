@@ -1,4 +1,5 @@
 using System;
+using CrepeControladorApi.Dtos;
 using CrepeControladorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,34 +16,53 @@ namespace CrepeControladorApi.Controllers
             _dashboardService = dashboardService;
         }
 
-        [HttpGet("horarios/dia-semana")]
-        public async Task<IActionResult> ObterHorariosPicoDiaSemana([FromQuery] byte diaSemana, [FromQuery] int? ano)
+        [HttpGet("horarios/periodo")]
+        public async Task<IActionResult> ObterHorariosPicoPeriodo([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
         {
-            if (diaSemana < 1 || diaSemana > 7)
+            if (dataInicio > dataFim)
             {
-                return BadRequest("Dia da semana deve estar entre 1 (segunda) e 7 (domingo).");
+                return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterHorariosPicoPorDiaSemana(diaSemana, ano);
+            var resultado = await _dashboardService.ObterHorariosPicoPorPeriodo(dataInicio, dataFim);
             return Ok(resultado);
         }
 
-        [HttpGet("horarios/mes")]
-        public async Task<IActionResult> ObterHorariosPicoMes([FromQuery] int ano, [FromQuery] int mes)
+        [HttpGet("dia-semana/picos")]
+        public async Task<IActionResult> ObterPicosPorDiaSemana([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
         {
-            if (mes < 1 || mes > 12)
+            if (dataInicio > dataFim)
             {
-                return BadRequest("Mes deve estar entre 1 e 12.");
+                return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterHorariosPicoPorMes(ano, mes);
+            var resultado = await _dashboardService.ObterHorariosPicoDiaSemanaResumo(dataInicio, dataFim);
             return Ok(resultado);
+        }
+
+        [HttpGet("dia-semana/distribuicao")]
+        public async Task<IActionResult> ObterDistribuicaoDiaSemana([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        {
+            if (dataInicio > dataFim)
+            {
+                return BadRequest("DataInicio nao pode ser maior que DataFim.");
+            }
+
+            var resultado = await _dashboardService.ObterDistribuicaoDiaSemanaPorHora(dataInicio, dataFim);
+            return Ok(resultado);
+        }
+
+        [HttpGet("periodo-total")]
+        public async Task<IActionResult> ObterPeriodoTotal()
+        {
+            var periodo = await _dashboardService.ObterPeriodoTotal();
+            return Ok(periodo ?? new DashboardPeriodoTotalDto());
         }
 
         [HttpGet("resumo")]
-        public async Task<IActionResult> ObterResumoPeriodo([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        public async Task<IActionResult> ObterResumoPeriodo([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
         {
-            if (dataInicio > dataFim)
+            if (DatasInvalidas(dataInicio, dataFim))
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
@@ -52,9 +72,9 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("itens-ranking")]
-        public async Task<IActionResult> ObterItensRanking([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        public async Task<IActionResult> ObterItensRanking([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
         {
-            if (dataInicio > dataFim)
+            if (DatasInvalidas(dataInicio, dataFim))
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
@@ -64,15 +84,20 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("tipo-pedido")]
-        public async Task<IActionResult> ObterTipoPedido([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        public async Task<IActionResult> ObterTipoPedido([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
         {
-            if (dataInicio > dataFim)
+            if (DatasInvalidas(dataInicio, dataFim))
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
             var resultado = await _dashboardService.ObterTipoPedido(dataInicio, dataFim);
             return Ok(resultado);
+        }
+
+        private static bool DatasInvalidas(DateTime? inicio, DateTime? fim)
+        {
+            return inicio.HasValue && fim.HasValue && inicio > fim;
         }
     }
 }

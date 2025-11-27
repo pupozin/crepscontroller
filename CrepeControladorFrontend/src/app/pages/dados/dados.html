@@ -122,32 +122,24 @@
       <article class="painel-card grafico">
         <header>
           <h3>{{ tituloGrafico }}</h3>
-          <small *ngIf="horariosDisponiveis">Pedidos e faturamento por hora</small>
-          <small *ngIf="!horariosDisponiveis">Disponivel para filtros de dia ou mes</small>
+          <small>{{ descricaoGraficoHoras }}</small>
         </header>
 
-        <ng-container *ngIf="horariosDisponiveis; else graficoIndisponivel">
-          <div class="grafico-barras" *ngIf="horariosPico.length; else graficoVazio">
-            <div class="barra" *ngFor="let ponto of horariosPico">
-              <div class="barra__grupo">
-                <div class="barra__coluna pedidos" [style.height.%]="obterAlturaBarraPedidos(ponto.quantidadePedidos)">
-                  <span class="valor">{{ ponto.quantidadePedidos }}</span>
-                </div>
-                <div class="barra__coluna faturamento" [style.height.%]="obterAlturaBarraFaturamento(ponto.faturamento)">
-                  <span class="valor">{{ ponto.faturamento | currency: 'BRL':'symbol':'1.0-0' }}</span>
-                </div>
+        <div class="grafico-barras" *ngIf="horariosPico.length; else graficoVazio">
+          <div class="barra" *ngFor="let ponto of horariosPico">
+            <div class="barra__grupo">
+              <div class="barra__coluna pedidos" [style.height.%]="obterAlturaBarraPedidos(ponto.quantidadePedidos)">
+                <span class="valor">{{ ponto.quantidadePedidos }}</span>
               </div>
-              <span class="rotulo">{{ ponto.horaFormatada }}</span>
+              <div class="barra__coluna faturamento" [style.height.%]="obterAlturaBarraFaturamento(ponto.faturamento)">
+                <span class="valor">{{ ponto.faturamento | currency: 'BRL':'symbol':'1.0-0' }}</span>
+              </div>
             </div>
+            <span class="rotulo">{{ ponto.horaFormatada }}</span>
           </div>
-          <ng-template #graficoVazio>
-            <p class="estado vazio">Nenhum dado para o periodo informado.</p>
-          </ng-template>
-        </ng-container>
-        <ng-template #graficoIndisponivel>
-          <p class="estado vazio">
-            Selecione o filtro de dia ou mes para acompanhar os horarios de pico.
-          </p>
+        </div>
+        <ng-template #graficoVazio>
+          <p class="estado vazio">Nenhum dado para o periodo informado.</p>
         </ng-template>
       </article>
 
@@ -172,6 +164,52 @@
           <p class="estado vazio">Nenhum pedido encontrado para o periodo.</p>
         </ng-template>
       </article>
+    </section>
+
+    <section class="painel-card analise-dia-semana" *ngIf="analiseDiaSemanaHabilitada">
+      <header>
+        <h3>Horarios com maior movimento</h3>
+        <small>Resumo por dia da semana</small>
+      </header>
+      <div class="picos-dia-semana" *ngIf="picosDiaSemana.length; else picosIndisponiveis">
+        <article class="pico-card" *ngFor="let pico of picosDiaSemana">
+          <span class="dia">{{ pico.nomeDia }}</span>
+          <strong>{{ pico.horaFormatada }}</strong>
+          <small>{{ pico.quantidadePedidos }} pedidos • {{ pico.faturamento | currency: 'BRL':'symbol':'1.0-0' }}</small>
+        </article>
+      </div>
+      <ng-template #picosIndisponiveis>
+        <p class="estado vazio">Nenhum pedido encontrado para o periodo.</p>
+      </ng-template>
+    </section>
+
+    <section class="painel-card analise-dia-semana grafico-dia-semana" *ngIf="analiseDiaSemanaHabilitada">
+      <header>
+        <h3>Pedidos por hora e dia da semana</h3>
+        <small>Comparativo por hora do periodo</small>
+      </header>
+      <div class="dia-semana-grid" *ngIf="distribuicaoDiaSemana.length; else distribuicaoIndisponivel">
+        <div class="dia-coluna" *ngFor="let dia of distribuicaoDiaSemana">
+          <strong>{{ dia.nomeDia }}</strong>
+          <div class="hora-linha" *ngFor="let ponto of dia.series">
+            <span class="hora">{{ ponto.horaFormatada }}</span>
+            <div class="barra-horas">
+              <div class="barra-horas__preenchimento" [style.width.%]="ponto.percentual"></div>
+            </div>
+            <small>{{ ponto.quantidadePedidos }} pedidos</small>
+          </div>
+          <p class="estado vazio" *ngIf="!dia.series.length">Sem pedidos no periodo.</p>
+        </div>
+      </div>
+      <ng-template #distribuicaoIndisponivel>
+        <p class="estado vazio">Sem dados suficientes para montar o comparativo.</p>
+      </ng-template>
+    </section>
+
+    <section class="painel-card analise-dia-semana aviso" *ngIf="!analiseDiaSemanaHabilitada">
+      <p class="estado vazio">
+        Selecione pelo menos 7 dias para liberar a analise por dia da semana.
+      </p>
     </section>
 
     <section class="painel-card itens" *ngIf="itensDestaque.length">

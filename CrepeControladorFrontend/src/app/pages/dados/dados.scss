@@ -171,11 +171,13 @@
       letter-spacing: 1px;
       font-size: 0.75rem;
       opacity: 0.8;
+      color: rgba(255, 255, 255, 0.9);
     }
 
     strong {
       font-size: 1.6rem;
       font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
     }
 
     &.destaque {
@@ -303,6 +305,8 @@
     overflow-x: auto;
   }
 
+  margin-top: 30px;
+
   table {
     width: 100%;
     border-collapse: collapse;
@@ -320,6 +324,90 @@
     tbody tr:nth-child(even) {
       background: rgba(255, 255, 255, 0.04);
     }
+  }
+}
+
+.analise-dia-semana {
+  margin-top: 24px;
+
+  .picos-dia-semana {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+
+  .pico-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .dia {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    strong {
+      font-size: 1.6rem;
+    }
+
+    small {
+      opacity: 0.8;
+    }
+  }
+
+  &.grafico-dia-semana {
+    .dia-semana-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .dia-coluna {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hora-linha {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      column-gap: 8px;
+      row-gap: 4px;
+      align-items: center;
+
+      .hora {
+        font-weight: 600;
+      }
+
+      .barra-horas {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 999px;
+        overflow: hidden;
+
+        &__preenchimento {
+          height: 100%;
+          background: var(--cor-secundaria);
+        }
+      }
+
+      small {
+        grid-column: 1 / -1;
+        font-size: 0.75rem;
+        opacity: 0.75;
+      }
+    }
+  }
+
+  &.aviso {
+    text-align: center;
   }
 }
 
