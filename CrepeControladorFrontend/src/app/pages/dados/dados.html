@@ -1,0 +1,206 @@
+<div class="dados-container container py-4">
+  <form class="filtros-card" (ngSubmit)="aplicarFiltros()" novalidate>
+    <div class="filtros-header">
+      <div>
+        <h2>Visao de dados</h2>
+        <p>Selecione o periodo para acompanhar os indicadores do negocio.</p>
+      </div>
+      <div class="acoes">
+        <button type="submit" class="btn-aplicar" [disabled]="carregando">Atualizar</button>
+      </div>
+    </div>
+
+    <div class="periodo-selector">
+      <button
+        type="button"
+        *ngFor="let periodo of periodos"
+        (click)="alterarPeriodo(periodo.valor)"
+        [class.ativo]="filtro.periodicidade === periodo.valor"
+      >
+        {{ periodo.label }}
+      </button>
+    </div>
+
+    <div class="filtros-detalhes">
+      <div class="campo" *ngIf="filtro.periodicidade === 'DIA'">
+        <label for="filtro-dia">Dia especifico</label>
+        <input
+          id="filtro-dia"
+          name="dia"
+          type="date"
+          [(ngModel)]="filtro.dia"
+          (change)="onCampoDataChange()"
+          required
+        />
+      </div>
+
+      <div class="campo" *ngIf="filtro.periodicidade === 'SEMANA'">
+        <label for="filtro-semana">Inicio da semana</label>
+        <input
+          id="filtro-semana"
+          name="semanaInicio"
+          type="date"
+          [(ngModel)]="filtro.semanaInicio"
+          (change)="onCampoDataChange()"
+          required
+        />
+      </div>
+
+      <div class="campo" *ngIf="filtro.periodicidade === 'MES'">
+        <label for="filtro-mes">Mes</label>
+        <input
+          id="filtro-mes"
+          name="mes"
+          type="month"
+          [(ngModel)]="filtro.mes"
+          (change)="onCampoDataChange()"
+          required
+        />
+      </div>
+
+      <ng-container *ngIf="filtro.periodicidade === 'PERSONALIZADO'">
+        <div class="campo">
+          <label for="filtro-inicio">Inicio</label>
+          <input
+            id="filtro-inicio"
+            name="intervaloInicio"
+            type="date"
+            [(ngModel)]="filtro.intervaloInicio"
+            (change)="onCampoDataChange()"
+            required
+          />
+        </div>
+        <div class="campo">
+          <label for="filtro-fim">Fim</label>
+          <input
+            id="filtro-fim"
+            name="intervaloFim"
+            type="date"
+            [(ngModel)]="filtro.intervaloFim"
+            (change)="onCampoDataChange()"
+            required
+          />
+        </div>
+      </ng-container>
+    </div>
+
+    <p class="erro-filtro" *ngIf="erroFiltro">{{ erroFiltro }}</p>
+  </form>
+
+  <div class="estado carregando" *ngIf="carregando">
+    <div class="spinner"></div>
+    <p>Carregando dados...</p>
+  </div>
+
+  <p class="estado erro" *ngIf="erro && !carregando">{{ erro }}</p>
+
+  <ng-container *ngIf="!carregando && !erro">
+    <section class="cards-resumo" *ngIf="resumo as indicadores">
+      <article class="card destaque">
+        <small>Faturamento total</small>
+        <strong>{{ indicadores.faturamentoTotal | currency: 'BRL':'symbol':'1.2-2' }}</strong>
+      </article>
+      <article class="card">
+        <small>Pedidos no periodo</small>
+        <strong>{{ indicadores.qtdePedidos | number: '1.0-0' }}</strong>
+      </article>
+      <article class="card">
+        <small>Ticket medio</small>
+        <strong>{{ indicadores.ticketMedio | currency: 'BRL':'symbol':'1.2-2' }}</strong>
+      </article>
+      <article class="card">
+        <small>Dias considerados</small>
+        <strong>{{ indicadores.qtdeDiasPeriodo | number: '1.0-0' }}</strong>
+      </article>
+      <article class="card">
+        <small>Media clientes/dia</small>
+        <strong>{{ indicadores.mediaClientesPorDia | number: '1.1-1' }}</strong>
+      </article>
+    </section>
+
+    <section class="painel-grid" *ngIf="resumo">
+      <article class="painel-card grafico">
+        <header>
+          <h3>{{ tituloGrafico }}</h3>
+          <small *ngIf="horariosDisponiveis">Pedidos e faturamento por hora</small>
+          <small *ngIf="!horariosDisponiveis">Disponivel para filtros de dia ou mes</small>
+        </header>
+
+        <ng-container *ngIf="horariosDisponiveis; else graficoIndisponivel">
+          <div class="grafico-barras" *ngIf="horariosPico.length; else graficoVazio">
+            <div class="barra" *ngFor="let ponto of horariosPico">
+              <div class="barra__grupo">
+                <div class="barra__coluna pedidos" [style.height.%]="obterAlturaBarraPedidos(ponto.quantidadePedidos)">
+                  <span class="valor">{{ ponto.quantidadePedidos }}</span>
+                </div>
+                <div class="barra__coluna faturamento" [style.height.%]="obterAlturaBarraFaturamento(ponto.faturamento)">
+                  <span class="valor">{{ ponto.faturamento | currency: 'BRL':'symbol':'1.0-0' }}</span>
+                </div>
+              </div>
+              <span class="rotulo">{{ ponto.horaFormatada }}</span>
+            </div>
+          </div>
+          <ng-template #graficoVazio>
+            <p class="estado vazio">Nenhum dado para o periodo informado.</p>
+          </ng-template>
+        </ng-container>
+        <ng-template #graficoIndisponivel>
+          <p class="estado vazio">
+            Selecione o filtro de dia ou mes para acompanhar os horarios de pico.
+          </p>
+        </ng-template>
+      </article>
+
+      <article class="painel-card distribuicao">
+        <header>
+          <h3>Distribuicao por tipo</h3>
+          <small>Quantidade e porcentagem por tipo de pedido</small>
+        </header>
+        <div *ngIf="tipoPedidoDistribuicao.length; else tiposVazio">
+          <div class="tipo-row" *ngFor="let tipo of tipoPedidoDistribuicao">
+            <div class="tipo-header">
+              <span>{{ tipo.tipoPedido }}</span>
+              <strong>{{ tipo.qtdePedidos }}</strong>
+            </div>
+            <div class="barra-tipo">
+              <div class="barra-tipo__preenchimento" [style.width.%]="tipo.percentual"></div>
+            </div>
+            <small>{{ tipo.percentual }}% - {{ tipo.faturamento | currency: 'BRL':'symbol':'1.0-0' }}</small>
+          </div>
+        </div>
+        <ng-template #tiposVazio>
+          <p class="estado vazio">Nenhum pedido encontrado para o periodo.</p>
+        </ng-template>
+      </article>
+    </section>
+
+    <section class="painel-card itens" *ngIf="itensDestaque.length">
+      <header>
+        <h3>Itens mais vendidos</h3>
+        <small>Ranking por quantidade e faturamento</small>
+      </header>
+      <div class="tabela-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qtd.</th>
+              <th>Faturamento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of itensDestaque">
+              <td>{{ item.nome }}</td>
+              <td>{{ item.quantidadeVendida | number: '1.0-0' }}</td>
+              <td>{{ item.faturamento | currency: 'BRL':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="estado vazio" *ngIf="!resumo && !carregando && !erro">
+      Nenhum dado disponivel para o periodo selecionado.
+    </p>
+  </ng-container>
+</div>
