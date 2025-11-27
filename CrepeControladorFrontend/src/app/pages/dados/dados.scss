@@ -233,6 +233,8 @@
       width: 100%;
       align-items: flex-end;
       justify-content: center;
+      height: clamp(160px, 25vh, 240px);
+      position: relative;
     }
 
     &__coluna {

@@ -421,14 +421,17 @@ export class Dados implements OnInit, OnDestroy {
     });
 
     const resultado = [...agrupado.values()].sort((a, b) => a.diaSemana - b.diaSemana);
+    const maximoGlobal = resultado.reduce((globalMax, dia) => {
+      const maximoDia = dia.series.reduce((maior, serie) => Math.max(maior, serie.quantidadePedidos), 0);
+      return Math.max(globalMax, maximoDia);
+    }, 0);
 
     resultado.forEach((dia) => {
-      const maximo = dia.series.reduce((maior, serie) => Math.max(maior, serie.quantidadePedidos), 0);
       dia.series = dia.series
         .sort((a, b) => a.hora - b.hora)
         .map((serie) => ({
           ...serie,
-          percentual: maximo ? Math.round((serie.quantidadePedidos / maximo) * 100) : 0
+          percentual: maximoGlobal ? Math.round((serie.quantidadePedidos / maximoGlobal) * 100) : 0
         }));
     });
 
