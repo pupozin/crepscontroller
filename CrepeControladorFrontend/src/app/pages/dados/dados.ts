@@ -334,9 +334,9 @@ export class Dados implements OnInit, OnDestroy {
   }
 
   private obterQuantidadeDias(periodo: PeriodoSelecionado): number {
-    const inicio = new Date(periodo.inicio);
-    const fim = new Date(periodo.fim);
-    if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
+    const inicio = this.criarDataLocal(periodo.inicio);
+    const fim = this.criarDataLocal(periodo.fim);
+    if (!inicio || !fim) {
       return 0;
     }
     const diferencaMs = fim.getTime() - inicio.getTime();
@@ -344,6 +344,18 @@ export class Dados implements OnInit, OnDestroy {
       return 0;
     }
     return Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  private criarDataLocal(valor?: string): Date | undefined {
+    if (!valor) {
+      return undefined;
+    }
+    const partes = valor.split('-').map((parte) => Number(parte));
+    if (partes.length < 3 || partes.some((parte) => Number.isNaN(parte) || parte <= 0)) {
+      return undefined;
+    }
+    const [ano, mes, dia] = partes;
+    return new Date(ano, mes - 1, dia);
   }
 
   private processarDistribuicaoTipoPedido(dados: DashboardTipoPedido[]): TipoPedidoDistribuicao[] {
@@ -446,10 +458,10 @@ export class Dados implements OnInit, OnDestroy {
   }
 
   private calcularDataFinalSemana(inicio: string): string {
-    if (!inicio) {
-      return '';
+    const dataInicio = this.criarDataLocal(inicio);
+    if (!dataInicio) {
+      return inicio;
     }
-    const dataInicio = new Date(inicio);
     const fim = new Date(dataInicio);
     fim.setDate(dataInicio.getDate() + 6);
     return this.formatarData(fim);
@@ -473,10 +485,11 @@ export class Dados implements OnInit, OnDestroy {
   }
 
   private calcularFimMes(inicio: string): string {
-    const dataInicio = new Date(inicio);
-    const fim = new Date(dataInicio);
-    fim.setMonth(fim.getMonth() + 1);
-    fim.setDate(0);
+    const dataInicio = this.criarDataLocal(inicio);
+    if (!dataInicio) {
+      return inicio;
+    }
+    const fim = new Date(dataInicio.getFullYear(), dataInicio.getMonth() + 1, 0);
     return this.formatarData(fim);
   }
 
