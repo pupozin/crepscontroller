@@ -20,10 +20,10 @@ namespace CrepeControladorApi.Services
 
         public Task<List<DashboardHorarioPicoDto>> ObterHorariosPicoPorPeriodo(DateTime dataInicio, DateTime dataFim)
         {
-            return ExecuteListAsync("sp_Dashboard_HorariosPico_Periodo", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_Periodo\"(@DataInicio::DATE, @DataFim::DATE)", command =>
             {
-                AddParameter(command, "@DataInicio", dataInicio);
-                AddParameter(command, "@DataFim", dataFim);
+                AddDateParameter(command, "@DataInicio", dataInicio);
+                AddDateParameter(command, "@DataFim", dataFim);
             }, reader => new DashboardHorarioPicoDto
             {
                 Hora = GetInt32(reader, "Hora"),
@@ -34,10 +34,10 @@ namespace CrepeControladorApi.Services
 
         public Task<List<DashboardDiaSemanaPicoDto>> ObterHorariosPicoDiaSemanaResumo(DateTime dataInicio, DateTime dataFim)
         {
-            return ExecuteListAsync("sp_Dashboard_HorariosPico_DiaSemanaResumo", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_DiaSemanaResumo\"(@DataInicio::DATE, @DataFim::DATE)", command =>
             {
-                AddParameter(command, "@DataInicio", dataInicio);
-                AddParameter(command, "@DataFim", dataFim);
+                AddDateParameter(command, "@DataInicio", dataInicio);
+                AddDateParameter(command, "@DataFim", dataFim);
             }, reader => new DashboardDiaSemanaPicoDto
             {
                 DiaSemana = GetInt32(reader, "DiaSemana"),
@@ -50,10 +50,10 @@ namespace CrepeControladorApi.Services
 
         public Task<List<DashboardDiaSemanaDistribuicaoDto>> ObterDistribuicaoDiaSemanaPorHora(DateTime dataInicio, DateTime dataFim)
         {
-            return ExecuteListAsync("sp_Dashboard_HorariosPico_DiaSemanaDistribuicao", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_DiaSemanaDistribuicao\"(@DataInicio::DATE, @DataFim::DATE)", command =>
             {
-                AddParameter(command, "@DataInicio", dataInicio);
-                AddParameter(command, "@DataFim", dataFim);
+                AddDateParameter(command, "@DataInicio", dataInicio);
+                AddDateParameter(command, "@DataFim", dataFim);
             }, reader => new DashboardDiaSemanaDistribuicaoDto
             {
                 DiaSemana = GetInt32(reader, "DiaSemana"),
@@ -66,10 +66,10 @@ namespace CrepeControladorApi.Services
 
         public async Task<DashboardResumoPeriodoDto> ObterResumoPeriodo(DateTime? dataInicio, DateTime? dataFim)
         {
-            var resultado = await ExecuteSingleAsync("sp_Dashboard_ResumoPeriodo", command =>
+            var resultado = await ExecuteSingleAsync("SELECT * FROM \"sp_Dashboard_ResumoPeriodo\"(@DataInicio::DATE, @DataFim::DATE)", command =>
             {
-                AddParameter(command, "@DataInicio", dataInicio);
-                AddParameter(command, "@DataFim", dataFim);
+                AddDateParameter(command, "@DataInicio", dataInicio);
+                AddDateParameter(command, "@DataFim", dataFim);
             }, reader => new DashboardResumoPeriodoDto
             {
                 QtdePedidos = GetInt32(reader, "QtdePedidos"),
@@ -84,10 +84,10 @@ namespace CrepeControladorApi.Services
 
         public Task<List<DashboardItemRankingDto>> ObterItensRanking(DateTime? dataInicio, DateTime? dataFim)
         {
-            return ExecuteListAsync("sp_Dashboard_ItensRanking", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_ItensRanking\"(@DataInicio::DATE, @DataFim::DATE)", command =>
             {
-                AddParameter(command, "@DataInicio", dataInicio);
-                AddParameter(command, "@DataFim", dataFim);
+                AddDateParameter(command, "@DataInicio", dataInicio);
+                AddDateParameter(command, "@DataFim", dataFim);
             }, reader => new DashboardItemRankingDto
             {
                 ItemId = GetInt32(reader, "ItemId"),
@@ -99,10 +99,10 @@ namespace CrepeControladorApi.Services
 
         public Task<List<DashboardTipoPedidoDto>> ObterTipoPedido(DateTime? dataInicio, DateTime? dataFim)
         {
-            return ExecuteListAsync("sp_Dashboard_TipoPedido", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_TipoPedido\"(@DataInicio::DATE, @DataFim::DATE)", command =>
             {
-                AddParameter(command, "@DataInicio", dataInicio);
-                AddParameter(command, "@DataFim", dataFim);
+                AddDateParameter(command, "@DataInicio", dataInicio);
+                AddDateParameter(command, "@DataFim", dataFim);
             }, reader => new DashboardTipoPedidoDto
             {
                 TipoPedido = reader.GetString(reader.GetOrdinal("TipoPedido")),
@@ -143,7 +143,7 @@ namespace CrepeControladorApi.Services
             {
                 await using var command = connection.CreateCommand();
                 command.CommandText = storedProcedure;
-                command.CommandType = CommandType.StoredProcedure;
+                command.CommandType = CommandType.Text;
                 configure?.Invoke(command);
 
                 var result = new List<T>();
@@ -179,7 +179,7 @@ namespace CrepeControladorApi.Services
             {
                 await using var command = connection.CreateCommand();
                 command.CommandText = storedProcedure;
-                command.CommandType = CommandType.StoredProcedure;
+                command.CommandType = CommandType.Text;
                 configure?.Invoke(command);
 
                 await using var reader = await command.ExecuteReaderAsync();
@@ -207,6 +207,22 @@ namespace CrepeControladorApi.Services
             command.Parameters.Add(parameter);
         }
 
+        private static void AddDateParameter(DbCommand command, string name, DateTime? value)
+        {
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = name;
+            if (value.HasValue)
+            {
+                parameter.Value = DateTime.SpecifyKind(value.Value.Date, DateTimeKind.Unspecified);
+            }
+            else
+            {
+                parameter.Value = DBNull.Value;
+            }
+            parameter.DbType = DbType.Date;
+            command.Parameters.Add(parameter);
+        }
+
         private static decimal GetDecimal(DbDataReader reader, string columnName)
         {
             var ordinal = reader.GetOrdinal(columnName);
@@ -218,5 +234,6 @@ namespace CrepeControladorApi.Services
             var ordinal = reader.GetOrdinal(columnName);
             return reader.IsDBNull(ordinal) ? 0 : Convert.ToInt32(reader.GetValue(ordinal));
         }
+
     }
 }

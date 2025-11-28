@@ -8,7 +8,7 @@
         public string TipoPedido { get; set; } = null!; 
         public string Status { get; set; } = "Preparando"; 
         public string? Observacao { get; set; }
-        public DateTime DataCriacao { get; set; } = DateTime.Now;
+        public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
         public DateTime? DataConclusao { get; set; }
 
         public decimal ValorTotal { get; set; }

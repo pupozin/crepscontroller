@@ -22,7 +22,7 @@ namespace CrepeControladorApi.Controllers
         public async Task<IActionResult> ObterItens()
         {
             var itens = await _context.Itens
-                .FromSqlRaw("EXEC sp_Item_Obter")
+                .FromSqlRaw("SELECT * FROM \"sp_Item_Obter\"({0})", (int?)null)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -33,7 +33,7 @@ namespace CrepeControladorApi.Controllers
         public async Task<IActionResult> ObterItem(int id)
         {
             var itens = await _context.Itens
-                .FromSqlInterpolated($"EXEC sp_Item_Obter @ItemId = {id}")
+                .FromSqlRaw("SELECT * FROM \"sp_Item_Obter\"({0})", id)
                 .AsNoTracking()
                 .ToListAsync();
 

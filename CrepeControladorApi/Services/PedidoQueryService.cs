@@ -31,8 +31,13 @@ namespace CrepeControladorApi.Services
             try
             {
                 await using var command = connection.CreateCommand();
-                command.CommandText = "sp_PesquisarPedidos";
-                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = """
+                    SELECT *
+                    FROM (
+                        SELECT * FROM "sp_PesquisarPedidos"(@Termo)
+                    ) AS pedidos("Id", "Codigo", "Cliente", "TipoPedido", "Status", "Observacao", "DataCriacao", "DataConclusao", "ValorTotal")
+                    """;
+                command.CommandType = CommandType.Text;
 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "@Termo";
@@ -63,8 +68,13 @@ namespace CrepeControladorApi.Services
             try
             {
                 await using var command = connection.CreateCommand();
-                command.CommandText = "sp_Pedidos_ListarAbertosPorTipoPedido";
-                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = """
+                    SELECT *
+                    FROM (
+                        SELECT * FROM "sp_Pedidos_ListarAbertosPorTipoPedido"(@TipoPedido)
+                    ) AS pedidos("Id", "Codigo", "Cliente", "TipoPedido", "Status", "Observacao", "DataCriacao", "DataConclusao", "ValorTotal")
+                    """;
+                command.CommandType = CommandType.Text;
 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "@TipoPedido";
@@ -95,8 +105,13 @@ namespace CrepeControladorApi.Services
             try
             {
                 await using var command = connection.CreateCommand();
-                command.CommandText = "sp_Pedidos_ListarPorGrupoStatus";
-                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = """
+                    SELECT *
+                    FROM (
+                        SELECT * FROM "sp_Pedidos_ListarPorGrupoStatus"(@Grupo)
+                    ) AS pedidos("Id", "Codigo", "Cliente", "TipoPedido", "Status", "Observacao", "DataCriacao", "DataConclusao", "ValorTotal")
+                    """;
+                command.CommandType = CommandType.Text;
 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "@Grupo";

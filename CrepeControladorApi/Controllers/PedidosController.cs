@@ -28,7 +28,7 @@ namespace CrepeControladorApi.Controllers
         public async Task<IActionResult> ObterPedidos()
         {
             var pedidos = await _context.Pedidos
-                .FromSqlRaw("EXEC sp_Pedido_Obter")
+                .FromSqlRaw("SELECT * FROM \"sp_Pedido_Obter\"({0})", (int?)null)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -39,7 +39,7 @@ namespace CrepeControladorApi.Controllers
         public async Task<IActionResult> ObterPedido(int id)
         {
             var pedidos = await _context.Pedidos
-                .FromSqlInterpolated($"EXEC sp_Pedido_Obter @PedidoId = {id}")
+                .FromSqlRaw("SELECT * FROM \"sp_Pedido_Obter\"({0})", id)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -124,7 +124,8 @@ namespace CrepeControladorApi.Controllers
                 Codigo = codigoPedido,
                 Cliente = pedidoDto.Cliente,
                 TipoPedido = pedidoDto.TipoPedido,
-                Observacao = pedidoDto.Observacao
+                Observacao = pedidoDto.Observacao,
+                DataCriacao = DateTime.UtcNow
             };
 
             decimal valorTotal = 0m;
@@ -243,7 +244,7 @@ namespace CrepeControladorApi.Controllers
 
             if (estavaAberto && StatusIndicaFechado(pedido.Status))
             {
-                pedido.DataConclusao = DateTime.Now;
+                pedido.DataConclusao = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();
@@ -300,8 +301,8 @@ namespace CrepeControladorApi.Controllers
             try
             {
                 await using var command = connection.CreateCommand();
-                command.CommandText = "sp_ItensPedido_ObterPorPedido";
-                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SELECT * FROM \"sp_ItensPedido_ObterPorPedido\"(@PedidoId)";
+                command.CommandType = CommandType.Text;
 
                 var parametro = command.CreateParameter();
                 parametro.ParameterName = "@PedidoId";
@@ -340,7 +341,7 @@ namespace CrepeControladorApi.Controllers
         public async Task<IActionResult> BuscarPedidos([FromQuery] string termo)
         {
             var pedidos = await _context.Pedidos
-                .FromSqlRaw("EXEC dbo.sp_PesquisarPedidos @Termo = {0}", termo)
+                .FromSqlRaw("SELECT * FROM \"sp_PesquisarPedidos\"({0})", termo)
                 .ToListAsync();
 
             return Ok(pedidos);
