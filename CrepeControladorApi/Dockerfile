@@ -12,6 +12,8 @@ COPY ["CrepeControladorApi.csproj", "./"]
 RUN dotnet restore "CrepeControladorApi.csproj"
 
 COPY . .
+RUN rm -rf bin obj
+RUN dotnet restore "CrepeControladorApi.csproj"
 RUN dotnet publish "CrepeControladorApi.csproj" -c Release -o /app/publish
 
 # Final

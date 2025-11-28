@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RestoreAdditionalProjectFallbackFolders></RestoreAdditionalProjectFallbackFolders>
     <RestoreFallbackFolders></RestoreFallbackFolders>
+    <RestoreFallbackFoldersOverride></RestoreFallbackFoldersOverride>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
 
   <ItemGroup>
