@@ -249,6 +249,8 @@
   align-items: flex-end;
   gap: 14px;
   min-height: 200px;
+  overflow-x: auto;
+  padding-bottom: 8px;
 
   .barra {
     flex: 1;
@@ -449,6 +451,13 @@
   }
 
   .grafico-barras {
+    overflow-x: auto;
+    padding-bottom: 12px;
+
+    .barra {
+      min-width: 90px;
+    }
+
     gap: 10px;
 
     .barra__coluna .valor {
