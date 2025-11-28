@@ -3,6 +3,36 @@
   background-color: var(--cor-primaria);
   min-height: calc(100vh - 120px);
 
+ .tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 50px;
+  position: sticky;
+  margin-top: -130px;
+  top: 0;
+  z-index: 50;
+  height: 200px;
+  background-color: var(--cor-primaria);
+
+  .tab {
+    background: none;
+    border: none;
+    color: var(--cor-branca);
+    font-weight: 600;
+    padding: clamp(8px, 2.5vw, 12px) 12px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: 0.3s;
+    font-size: clamp(16px, 3.5vw, 18px);
+    width: 200px;
+    padding-top: 150px;
+
+    &.active {
+      border-color: var(--cor-branca);
+    }
+  }
+}
+
   .estado {
     text-align: center;
     margin: 24px 0;

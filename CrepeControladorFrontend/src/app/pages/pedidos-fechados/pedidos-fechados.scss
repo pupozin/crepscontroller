@@ -19,7 +19,7 @@
   .tab {
     background: none;
     border: none;
-    color: #fff;
+    color: var(--cor-branca);
     font-weight: 600;
     padding: clamp(8px, 2.5vw, 12px) 12px;
     cursor: pointer;
@@ -46,10 +46,11 @@
   gap: 30px;
 
   section {
-    background: #fff;
-    color: #000;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--cor-branca);
     border-radius: 24px;
     padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 
     header {
       display: flex;
@@ -69,12 +70,13 @@
 }
 
 .card-processo {
-  background: #f7f7f7;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 
   .card-header {
     display: flex;
@@ -84,12 +86,14 @@
     h4 {
       margin: 0;
       font-size: 18px;
+      color: var(--cor-branca);
     }
   }
 
   p {
     margin: 0;
     font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
 
     i {
       margin-right: 6px;
@@ -107,8 +111,8 @@
   .btn-detalhes {
     margin-top: 10px;
     align-self: flex-start;
-    background: var(--cor-primaria);
-    color: #fff;
+    background: var(--cor-secundaria);
+    color: #2d2012;
     border: none;
     border-radius: 999px;
     padding: 6px 18px;
@@ -117,10 +121,11 @@
 }
 
 .aba-tipos {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   padding: 24px;
-  color: #000;
+  color: var(--cor-branca);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .abas-internas {
@@ -140,8 +145,8 @@
     padding-inline: clamp(4px, 2vw, 8px);
 
     &.active {
-      border-color: var(--cor-primaria);
-      color: var(--cor-primaria);
+      border-color: var(--cor-branca);
+      color: var(--cor-branca);
     }
   }
 }
@@ -154,7 +159,7 @@
 }
 
 .linha-processo {
-  background: #f7f7f7;
+  background: rgba(255, 255, 255, 0.05);
   padding: 14px 18px;
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr auto auto;
@@ -162,9 +167,10 @@
   column-gap: 12px;
   min-width: 640px;
   font-size: clamp(14px, 3.4vw, 15px);
+  color: var(--cor-branca);
 
   &:nth-child(even) {
-    background: #ececec;
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .codigo {
@@ -172,9 +178,9 @@
   }
 
   .btn-detalhes {
-    background: #fff;
-    border: 1px solid var(--cor-primaria);
-    color: var(--cor-primaria);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--cor-branca);
     border-radius: 999px;
     padding: clamp(6px, 2.8vw, 10px) clamp(12px, 3.5vw, 16px);
     cursor: pointer;
@@ -182,8 +188,8 @@
   }
 
   .btn-acao {
-    background: var(--cor-primaria);
-    color: #fff;
+    background: var(--cor-secundaria);
+    color: #2d2012;
     border: none;
     border-radius: 999px;
     padding: clamp(6px, 2.8vw, 10px) clamp(12px, 3.5vw, 16px);
@@ -201,7 +207,7 @@
 .estado-vazio {
   margin: 20px 0;
   text-align: center;
-  color: #575757;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 15px;
 }
 
@@ -214,7 +220,7 @@
 
   .paginacao-nav {
     border: none;
-    background: #f1f1f1;
+    background: rgba(255, 255, 255, 0.12);
     width: 40px;
     height: 40px;
     border-radius: 999px;
@@ -224,6 +230,7 @@
     font-size: 18px;
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
+    color: var(--cor-branca);
 
     &:disabled {
       opacity: 0.6;
@@ -231,8 +238,8 @@
     }
 
     &:not(:disabled):hover {
-      background: var(--cor-primaria);
-      color: #fff;
+      background: var(--cor-secundaria);
+      color: #2d2012;
     }
   }
 
@@ -241,7 +248,7 @@
     gap: 6px;
     font-weight: 600;
     font-size: 16px;
-    color: var(--cor-primaria);
+    color: var(--cor-secundaria);
   }
 }
 
@@ -263,7 +270,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(20, 14, 8, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,8 +278,8 @@
 }
 
 .modal-detalhes {
-  background: #fff;
-  color: #000;
+  background: rgba(141, 110, 80, 0.95);
+  color: var(--cor-branca);
   border-radius: 18px;
   padding: 32px;
   width: 520px;
@@ -284,14 +291,16 @@
   h2 {
     margin: 0 0 20px;
     font-size: 23px;
+    color: var(--cor-branca);
   }
 
   p {
     margin: 4px 0;
+    color: rgba(255, 255, 255, 0.85);
 
     i {
       margin-right: 6px;
-      color: var(--cor-primaria);
+      color: var(--cor-branca);
     }
   }
 
@@ -330,9 +339,14 @@
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #ddd;
-      background: #f5f5f5;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.95);
       font-size: 14px;
+      color: var(--cor-primaria);
+    }
+
+    select option {
+      color: var(--cor-primaria);
     }
 
     textarea {
@@ -354,7 +368,7 @@
     display: flex;
     justify-content: space-between;
     padding: 10px 0;
-    border-bottom: 1px solid #e2e2e2;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 
     &:last-child {
       border-bottom: none;
@@ -372,16 +386,22 @@
       flex: 1;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #ddd;
-      background: #f5f5f5;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--cor-primaria);
+
+      option {
+        color: var(--cor-primaria);
+      }
     }
 
     input[type='number'] {
       width: 80px;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #ddd;
-      background: #f5f5f5;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--cor-primaria);
     }
 
     .btn-remover {
@@ -389,8 +409,8 @@
       height: 36px;
       border-radius: 8px;
       border: none;
-      background: #ffe5e5;
-      color: #c53030;
+      background: rgba(239, 68, 68, 0.2);
+      color: #ffd0d0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -400,12 +420,13 @@
 
   .btn-adicionar {
     margin-top: 12px;
-    background: #f0f0f0;
+    background: var(--cor-secundaria);
     border: none;
     border-radius: 999px;
     padding: 8px 18px;
     cursor: pointer;
     font-weight: 600;
+    color: #2d2012;
   }
 }
 
@@ -416,7 +437,7 @@
 
 .mensagem-erro {
   margin-top: 12px;
-  color: #c53030;
+  color: #ffd0d0;
   font-weight: 600;
 }
 
@@ -433,22 +454,23 @@
     cursor: pointer;
 
     &.btn-cancelar {
-      background: #f3f3f3;
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--cor-branca);
     }
 
     &.btn-concluir {
-      background: #00a34d;
-      color: #fff;
+      background: var(--cor-secundaria);
+      color: #2d2012;
     }
 
     &.btn-finalizar {
-      background: #f97316;
-      color: #fff;
+      background: var(--cor-primaria);
+      color: var(--cor-branca);
     }
 
     &.btn-cancelar-status {
-      background: #ef4444;
-      color: #fff;
+      background: rgba(239, 68, 68, 0.25);
+      color: #ffd0d0;
     }
 
     &:disabled {
