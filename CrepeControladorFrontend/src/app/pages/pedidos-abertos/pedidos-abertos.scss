@@ -143,6 +143,7 @@
     border-bottom: 2px solid transparent;
     cursor: pointer;
     font-size: clamp(14px, 3.5vw, 15px);
+    color: #000;
 
     &.active {
       border-color: var(--cor-branca);

@@ -143,6 +143,7 @@
     cursor: pointer;
     font-size: clamp(14px, 3.5vw, 15px);
     padding-inline: clamp(4px, 2vw, 8px);
+    color: #000;
 
     &.active {
       border-color: var(--cor-branca);
