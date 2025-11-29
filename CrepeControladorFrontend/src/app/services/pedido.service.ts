@@ -125,13 +125,25 @@ export class PedidoService {
   }
 
   private buildUrl(path: string): string {
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    try {
-      return new URL(normalizedPath, this.apiUrl).toString();
-    } catch (err) {
-      const sanitizedBase = (this.apiUrl ?? '').replace(/\\/g, '/');
-      const baseEndsWithSlash = sanitizedBase.endsWith('/') ? sanitizedBase : `${sanitizedBase}/`;
-      return `${baseEndsWithSlash}${normalizedPath.replace(/^\//, '')}`;
+    const trimmedPath = path.replace(/^\/+/, '');
+    const sanitizedBase = (this.apiUrl ?? '').replace(/\\/g, '/').trim();
+
+    if (!sanitizedBase) {
+      return `/${trimmedPath}`;
     }
+
+    const baseWithSlash = sanitizedBase.endsWith('/') ? sanitizedBase : `${sanitizedBase}/`;
+    const isAbsoluteBase = /^https?:\/\//i.test(baseWithSlash);
+
+    if (isAbsoluteBase) {
+      try {
+        return new URL(trimmedPath, baseWithSlash).toString();
+      } catch {
+        return `${baseWithSlash}${trimmedPath}`;
+      }
+    }
+
+    const normalizedBase = baseWithSlash.startsWith('/') ? baseWithSlash : `/${baseWithSlash}`;
+    return `${normalizedBase}${trimmedPath}`;
   }
 }
