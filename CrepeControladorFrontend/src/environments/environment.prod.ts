@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://localhost:7004/api/'
+  apiUrl: 'https://crepscontroller-006e6.sevalla.app'
 };
