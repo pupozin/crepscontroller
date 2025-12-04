@@ -137,6 +137,7 @@ namespace CrepeControladorApi.Services
             if (shouldClose)
             {
                 await connection.OpenAsync();
+                await connection.EnsureApplicationTimeZoneAsync();
             }
 
             try
@@ -173,6 +174,7 @@ namespace CrepeControladorApi.Services
             if (shouldClose)
             {
                 await connection.OpenAsync();
+                await connection.EnsureApplicationTimeZoneAsync();
             }
 
             try

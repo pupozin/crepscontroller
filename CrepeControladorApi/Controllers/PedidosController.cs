@@ -296,6 +296,7 @@ namespace CrepeControladorApi.Controllers
             if (fecharConexao)
             {
                 await connection.OpenAsync();
+                await connection.EnsureApplicationTimeZoneAsync();
             }
 
             try
