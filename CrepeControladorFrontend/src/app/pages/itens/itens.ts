@@ -107,6 +107,7 @@ export class Itens implements OnInit {
           this.itens.push(item);
           this.recalcularGrupos();
         }
+        location.reload() 
       },
       error: (err) => {
         console.error('Erro ao salvar item', err);

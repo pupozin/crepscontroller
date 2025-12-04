@@ -29,7 +29,7 @@ export class Header implements OnInit, OnDestroy {
   menuAberto = false;
   modalCriarAberto = false;
 
-  readonly tiposPedido = ['Entrega', 'Restaurante'];
+  readonly tiposPedido = ['Entrega', 'Restaurante', 'Retirada'];
   itensDisponiveis: PedidoItemSelecionavel[] = [];
   carregandoItens = false;
 

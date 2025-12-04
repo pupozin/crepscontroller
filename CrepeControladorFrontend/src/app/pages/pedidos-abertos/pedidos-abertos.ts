@@ -31,7 +31,7 @@ interface PedidoFormulario {
 })
 export class PedidosAbertos implements OnInit, OnDestroy {
   abaAtiva: AbaPedidos = 'resumo';
-  readonly tiposPedido = ['Entrega', 'Restaurante'];
+  readonly tiposPedido = ['Entrega', 'Restaurante', 'Retirada'];
   readonly statusAbertos = ['Preparando', 'Pronto'];
 
   tipoAtivo = this.tiposPedido[0];
