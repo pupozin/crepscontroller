@@ -26,6 +26,12 @@
   }
 }
 
+@media (max-width: 1280px) {
+  .acoes-aba {
+    right: clamp(20px, 10vw, 200px);
+  }
+}
+
 .estado {
   margin: 10px 0;
 }
