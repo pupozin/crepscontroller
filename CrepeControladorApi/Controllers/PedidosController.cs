@@ -40,6 +40,7 @@ namespace CrepeControladorApi.Controllers
 
             var pedidos = await _context.Pedidos
                 .AsNoTracking()
+                .Include(p => p.Mesa)
                 .Where(p => p.EmpresaId == empresaId)
                 .ToListAsync();
 
@@ -54,7 +55,10 @@ namespace CrepeControladorApi.Controllers
                 DataCriacao = p.DataCriacao,
                 DataConclusao = p.DataConclusao,
                 ValorTotal = p.ValorTotal,
-                EmpresaId = p.EmpresaId
+                EmpresaId = p.EmpresaId,
+                Endereco = p.Endereco,
+                MesaId = p.MesaId,
+                MesaNumero = p.Mesa?.Numero
             }));
         }
 
@@ -70,6 +74,7 @@ namespace CrepeControladorApi.Controllers
                 .AsNoTracking()
                 .Include(p => p.Itens)
                 .ThenInclude(i => i.Item)
+                .Include(p => p.Mesa)
                 .FirstOrDefaultAsync(p => p.Id == id && p.EmpresaId == empresaId);
 
             if (pedido == null)
@@ -102,6 +107,9 @@ namespace CrepeControladorApi.Controllers
                 pedido.DataConclusao,
                 pedido.ValorTotal,
                 pedido.EmpresaId,
+                pedido.Endereco,
+                pedido.MesaId,
+                MesaNumero = pedido.Mesa?.Numero,
                 Itens = itens
             });
         }
@@ -176,6 +184,19 @@ namespace CrepeControladorApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
+            var tipoNormalizado = pedidoDto.TipoPedido.Trim();
+            var (enderecoValido, mesaValida) = await ValidarEntregaMesaAsync(tipoNormalizado, pedidoDto.Endereco, pedidoDto.MesaId, pedidoDto.EmpresaId);
+            if (!enderecoValido)
+            {
+                ModelState.AddModelError(nameof(pedidoDto.Endereco), "Endereco e obrigatorio para pedidos de entrega.");
+                return ValidationProblem(ModelState);
+            }
+            if (!mesaValida)
+            {
+                ModelState.AddModelError(nameof(pedidoDto.MesaId), "Mesa informada invalida para esta empresa.");
+                return ValidationProblem(ModelState);
+            }
+
             var empresaId = _currentUser.EmpresaId!.Value;
             var codigoPedido = await GerarCodigoPedidoAsync(empresaId);
 
@@ -186,7 +207,9 @@ namespace CrepeControladorApi.Controllers
                 TipoPedido = pedidoDto.TipoPedido,
                 Observacao = pedidoDto.Observacao,
                 DataCriacao = DateTime.UtcNow,
-                EmpresaId = empresaId
+                EmpresaId = empresaId,
+                Endereco = tipoNormalizado.Equals("Entrega", StringComparison.OrdinalIgnoreCase) ? pedidoDto.Endereco : null,
+                MesaId = tipoNormalizado.Equals("Restaurante", StringComparison.OrdinalIgnoreCase) ? pedidoDto.MesaId : null
             };
 
             decimal valorTotal = 0m;
@@ -274,6 +297,18 @@ namespace CrepeControladorApi.Controllers
             pedido.TipoPedido = pedidoDto.TipoPedido;
             pedido.Status = pedidoDto.Status;
             pedido.Observacao = pedidoDto.Observacao;
+            var tipoNormalizado = pedidoDto.TipoPedido.Trim();
+            var (enderecoValido, mesaValida) = await ValidarEntregaMesaAsync(tipoNormalizado, pedidoDto.Endereco, pedidoDto.MesaId, pedidoDto.EmpresaId);
+            if (!enderecoValido)
+            {
+                ModelState.AddModelError(nameof(pedidoDto.Endereco), "Endereco e obrigatorio para pedidos de entrega.");
+                return ValidationProblem(ModelState);
+            }
+            if (!mesaValida)
+            {
+                ModelState.AddModelError(nameof(pedidoDto.MesaId), "Mesa informada invalida para esta empresa.");
+                return ValidationProblem(ModelState);
+            }
 
             decimal valorTotal = 0m;
             var novosItens = new List<ItensPedido>();
@@ -309,6 +344,8 @@ namespace CrepeControladorApi.Controllers
             }
 
             pedido.ValorTotal = valorTotal;
+            pedido.Endereco = tipoNormalizado.Equals("Entrega", StringComparison.OrdinalIgnoreCase) ? pedidoDto.Endereco : null;
+            pedido.MesaId = tipoNormalizado.Equals("Restaurante", StringComparison.OrdinalIgnoreCase) ? pedidoDto.MesaId : null;
 
             if (estavaAberto && StatusIndicaFechado(pedido.Status))
             {
@@ -325,6 +362,9 @@ namespace CrepeControladorApi.Controllers
                 pedido.Status,
                 pedido.EmpresaId,
                 pedido.ValorTotal,
+                pedido.Endereco,
+                pedido.MesaId,
+                MesaNumero = pedido.Mesa?.Numero,
                 Itens = pedido.Itens.Select(i => new
                 {
                     i.ItemId,
@@ -368,6 +408,22 @@ namespace CrepeControladorApi.Controllers
 
             var pedidos = await _pedidoQueryService.PesquisarPedidosAsync(termo, empresaId);
             return Ok(pedidos);
+        }
+
+        private async Task<(bool enderecoOk, bool mesaOk)> ValidarEntregaMesaAsync(string tipoPedido, string? endereco, int? mesaId, int empresaId)
+        {
+            var isEntrega = string.Equals(tipoPedido, "Entrega", StringComparison.OrdinalIgnoreCase);
+            var isRestaurante = string.Equals(tipoPedido, "Restaurante", StringComparison.OrdinalIgnoreCase);
+
+            var enderecoOk = !isEntrega || (!string.IsNullOrWhiteSpace(endereco) && endereco.Length <= 250);
+
+            if (!isRestaurante || mesaId == null)
+            {
+                return (enderecoOk, !isRestaurante || mesaId == null);
+            }
+
+            var mesaExiste = await _context.Mesas.AnyAsync(m => m.Id == mesaId && m.EmpresaId == empresaId);
+            return (enderecoOk, mesaExiste);
         }
     }
 }

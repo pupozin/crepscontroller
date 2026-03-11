@@ -1,0 +1,73 @@
+<div class="pedidos-fechados-container mesas-page container py-4">
+  <div class="pedidos-loading-overlay" *ngIf="carregando">
+    <div class="pedidos-spinner"></div>
+    <p>Carregando mesas...</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" type="button">Mesas</button>
+  </div>
+
+  <div class="acoes-aba">
+    <button class="btn-acao btn" type="button" (click)="abrirModalMesa()">
+      <i class="fa-solid fa-plus"></i>
+      Mesa
+    </button>
+  </div>
+
+  <div class="aba-tipos">
+    <div class="abas-internas">
+      <button class="active" type="button">
+        Todas ({{ mesas.length }})
+      </button>
+    </div>
+
+    <div class="lista-processos" *ngIf="mesas.length">
+      <div *ngFor="let mesa of mesas" class="linha-processo">
+        <span class="codigo">{{ mesa.numero }}</span>
+        <span><i class="fa-solid fa-tag"></i> #{{ mesa.id }}</span>
+        <span class="status">
+          <i class="fa-solid fa-circle" style="color:#0ea5e9"></i>
+          Ativa
+        </span>
+        <button class="btn-detalhes" type="button" (click)="abrirModalMesa(mesa)">Editar</button>
+        <button class="btn-acao" type="button" (click)="excluirMesa(mesa)">
+          Excluir
+        </button>
+      </div>
+    </div>
+
+    <div class="estado-vazio" *ngIf="!mesas.length && !carregando">
+      Nenhuma mesa cadastrada.
+    </div>
+  </div>
+
+  <div class="modal-overlay-detalhe" *ngIf="modalMesaAberto" (click)="fecharModalMesa()">
+    <div class="modal-detalhes" (click)="$event.stopPropagation()">
+      <button class="btn-fechar" type="button" (click)="fecharModalMesa()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+
+      <h2>{{ mesaEmEdicao ? 'Editar mesa' : 'Nova mesa' }}</h2>
+
+      <label>Numero</label>
+      <input type="text" [(ngModel)]="novaMesaNumero" placeholder="Mesa 1" />
+
+      <div class="mensagem-erro" *ngIf="mensagemMesa">
+        {{ mensagemMesa }}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancelar" type="button" (click)="fecharModalMesa()">Cancelar</button>
+        <button
+          class="btn-concluir"
+          type="button"
+          (click)="salvarMesa()"
+          [disabled]="salvandoMesa"
+        >
+          {{ salvandoMesa ? 'Salvando...' : mesaEmEdicao ? 'Salvar alteracoes' : 'Adicionar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

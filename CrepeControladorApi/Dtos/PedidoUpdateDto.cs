@@ -24,5 +24,11 @@ namespace CrepeControladorApi.Dtos
         [Required]
         [Range(1, int.MaxValue)]
         public int EmpresaId { get; set; }
+
+        [StringLength(250)]
+        public string? Endereco { get; set; }
+
+        [Range(1, int.MaxValue)]
+        public int? MesaId { get; set; }
     }
 }

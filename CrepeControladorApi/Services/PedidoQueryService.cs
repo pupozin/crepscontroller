@@ -22,6 +22,7 @@ namespace CrepeControladorApi.Services
         {
             var query = _context.Pedidos
                 .AsNoTracking()
+                .Include(p => p.Mesa)
                 .Where(p => p.EmpresaId == empresaId);
 
             if (!string.IsNullOrWhiteSpace(termo))
@@ -39,6 +40,7 @@ namespace CrepeControladorApi.Services
         {
             var query = _context.Pedidos
                 .AsNoTracking()
+                .Include(p => p.Mesa)
                 .Where(p => p.EmpresaId == empresaId &&
                             p.TipoPedido == tipoPedido &&
                             !StatusFechados.Contains(p.Status));
@@ -49,6 +51,7 @@ namespace CrepeControladorApi.Services
         public Task<List<PedidoResumoDto>> ListarPorGrupoStatusAsync(string grupo, int empresaId)
         {
             var query = _context.Pedidos.AsNoTracking().Where(p => p.EmpresaId == empresaId);
+            query = query.Include(p => p.Mesa);
 
             if (string.Equals(grupo, "ABERTOS", StringComparison.OrdinalIgnoreCase))
             {
@@ -77,7 +80,10 @@ namespace CrepeControladorApi.Services
                 DataCriacao = p.DataCriacao,
                 DataConclusao = p.DataConclusao,
                 ValorTotal = p.ValorTotal,
-                EmpresaId = p.EmpresaId
+                EmpresaId = p.EmpresaId,
+                Endereco = p.Endereco,
+                MesaId = p.MesaId,
+                MesaNumero = p.Mesa?.Numero
             });
         }
     }

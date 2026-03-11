@@ -16,6 +16,7 @@ namespace CrepeControladorApi.Data
         public DbSet<Empresa> Empresas { get; set; } = null!;
         public DbSet<Usuario> Usuarios { get; set; } = null!;
         public DbSet<Perfil> Perfis { get; set; } = null!;
+        public DbSet<Mesa> Mesas { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,10 +39,20 @@ namespace CrepeControladorApi.Data
                 .IsRequired();
 
             modelBuilder.Entity<Pedido>()
+                .Property(p => p.Endereco)
+                .HasMaxLength(250);
+
+            modelBuilder.Entity<Pedido>()
                 .HasOne(p => p.Empresa)
                 .WithMany(e => e.Pedidos)
                 .HasForeignKey(p => p.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.Mesa)
+                .WithMany(m => m.Pedidos)
+                .HasForeignKey(p => p.MesaId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Item>()
                 .Property(i => i.Nome)
@@ -53,6 +64,22 @@ namespace CrepeControladorApi.Data
                 .WithMany(e => e.Itens)
                 .HasForeignKey(i => i.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Mesa>()
+                .Property(m => m.Numero)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            modelBuilder.Entity<Mesa>()
+                .Property(m => m.Ativa)
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            modelBuilder.Entity<Mesa>()
+                .HasOne(m => m.Empresa)
+                .WithMany(e => e.Mesas)
+                .HasForeignKey(m => m.EmpresaId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ItensPedido>()
                 .HasOne(ip => ip.Pedido)

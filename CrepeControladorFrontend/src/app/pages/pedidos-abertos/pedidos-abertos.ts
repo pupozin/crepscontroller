@@ -10,6 +10,7 @@ import {
   PedidoService,
   PedidoUpdatePayload
 } from '../../services/pedido.service';
+import { Mesa, MesaService } from '../../services/mesa.service';
 
 type AbaPedidos = 'resumo' | 'tipos';
 type PedidoItemForm = { itemId: number | null; quantidade: number };
@@ -19,6 +20,8 @@ interface PedidoFormulario {
   tipoPedido: string;
   status: string;
   observacao: string;
+   endereco: string;
+   mesaId: number | null;
   itens: PedidoItemForm[];
 }
 
@@ -42,6 +45,7 @@ export class PedidosAbertos implements OnInit, OnDestroy {
   pedidosPorTipo: Record<string, PedidoResumo[]> = {};
   tiposCarregando: Record<string, boolean> = {};
   itensDisponiveis: PedidoItemSelecionavel[] = [];
+  mesas: Mesa[] = [];
 
   carregando = false;
   salvandoPedido = false;
@@ -58,12 +62,14 @@ export class PedidosAbertos implements OnInit, OnDestroy {
 
   constructor(
     private readonly pedidoService: PedidoService,
+    private readonly mesaService: MesaService,
     private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.carregarPedidosAbertos();
     this.carregarItensDisponiveis();
+    this.carregarMesas();
 
     this.subscriptions.add(
       this.pedidoService.atualizacoes$.subscribe(() => this.recarregarDados())
@@ -305,6 +311,8 @@ export class PedidosAbertos implements OnInit, OnDestroy {
       tipoPedido: this.tiposPedido[0],
       status: this.statusAbertos[0],
       observacao: '',
+      endereco: '',
+      mesaId: null,
       itens: [{ itemId: null, quantidade: 1 }]
     };
   }
@@ -323,6 +331,8 @@ export class PedidosAbertos implements OnInit, OnDestroy {
       tipoPedido: detalhe.tipoPedido,
       status: detalhe.status,
       observacao: detalhe.observacao ?? '',
+      endereco: detalhe.endereco ?? '',
+      mesaId: detalhe.mesaId ?? null,
       itens
     };
     this.mensagemFormulario = '';
@@ -343,6 +353,16 @@ export class PedidosAbertos implements OnInit, OnDestroy {
   private recarregarDados(): void {
     this.carregarPedidosAbertos();
     Object.keys(this.pedidosPorTipo).forEach((tipo) => this.carregarPedidosPorTipo(tipo));
+  }
+
+  private carregarMesas(): void {
+    this.mesaService.listar().subscribe({
+      next: (mesas) => (this.mesas = mesas),
+      error: (err) => {
+        console.error('Erro ao carregar mesas', err);
+        this.mesas = [];
+      }
+    });
   }
 
   private normalizarStatus(status?: string): string {
@@ -370,11 +390,27 @@ export class PedidosAbertos implements OnInit, OnDestroy {
       return null;
     }
 
+    const tipo = this.pedidoFormulario.tipoPedido;
+    const endereco = this.pedidoFormulario.endereco.trim();
+    const mesaId = this.pedidoFormulario.mesaId;
+
+    if (tipo === 'Entrega' && !endereco) {
+      this.mensagemFormulario = 'Endereco obrigatorio para entrega.';
+      return null;
+    }
+
+    if (tipo === 'Restaurante' && !mesaId) {
+      this.mensagemFormulario = 'Selecione uma mesa para pedidos de restaurante.';
+      return null;
+    }
+
     return {
       cliente: this.pedidoFormulario.cliente.trim() || undefined,
       tipoPedido: this.pedidoFormulario.tipoPedido,
       status,
       observacao: this.pedidoFormulario.observacao.trim() || undefined,
+      endereco: tipo === 'Entrega' ? endereco : undefined,
+      mesaId: tipo === 'Restaurante' ? mesaId ?? undefined : undefined,
       itens: itensValidos
     };
   }
@@ -385,6 +421,8 @@ export class PedidosAbertos implements OnInit, OnDestroy {
       tipoPedido: detalhe.tipoPedido,
       status,
       observacao: detalhe.observacao ?? undefined,
+      endereco: detalhe.endereco ?? undefined,
+      mesaId: detalhe.mesaId ?? undefined,
       itens: detalhe.itens.map((item) => ({
         itemId: item.itemId,
         quantidade: item.quantidade

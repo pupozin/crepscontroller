@@ -139,6 +139,29 @@
             </select>
           </div>
 
+          <div *ngIf="pedidoFormulario.tipoPedido === 'Entrega'">
+            <label>Endereco</label>
+            <input
+              type="text"
+              [(ngModel)]="pedidoFormulario.endereco"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Rua, numero, bairro"
+            />
+          </div>
+
+          <div *ngIf="pedidoFormulario.tipoPedido === 'Restaurante'">
+            <label>Mesa</label>
+            <select
+              [(ngModel)]="pedidoFormulario.mesaId"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option [ngValue]="null" disabled>Selecione a mesa</option>
+              <option *ngFor="let mesa of mesas" [ngValue]="mesa.id">
+                {{ mesa.numero }}
+              </option>
+            </select>
+          </div>
+
           <div>
             <label>Status</label>
             <select

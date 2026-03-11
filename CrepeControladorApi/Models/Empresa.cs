@@ -12,5 +12,6 @@ namespace CrepeControladorApi.Models
         public ICollection<Usuario>? Usuarios { get; set; }
         public ICollection<Item>? Itens { get; set; }
         public ICollection<Pedido>? Pedidos { get; set; }
+        public ICollection<Mesa>? Mesas { get; set; }
     }
 }

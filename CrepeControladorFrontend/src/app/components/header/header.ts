@@ -15,6 +15,7 @@ import {
   PedidoResumo,
   PedidoService
 } from '../../services/pedido.service';
+import { Mesa, MesaService } from '../../services/mesa.service';
 import { AuthService, UsuarioAutenticado } from '../../services/auth.service';
 
 @Component({
@@ -32,12 +33,15 @@ export class Header implements OnInit, OnDestroy {
 
   readonly tiposPedido = ['Entrega', 'Restaurante', 'Retirada'];
   itensDisponiveis: PedidoItemSelecionavel[] = [];
+  mesas: Mesa[] = [];
   carregandoItens = false;
 
   novoPedido = {
     cliente: '',
     tipoPedido: this.tiposPedido[0],
     observacao: '',
+    endereco: '',
+    mesaId: null as number | null,
     itens: [{ itemId: null as number | null, quantidade: 1 }]
   };
 
@@ -55,6 +59,7 @@ export class Header implements OnInit, OnDestroy {
 
   constructor(
     private readonly pedidoService: PedidoService,
+    private readonly mesaService: MesaService,
     private readonly router: Router,
     private readonly auth: AuthService,
     @Inject(DOCUMENT) private readonly document: Document
@@ -62,6 +67,7 @@ export class Header implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.carregarItens();
+    this.carregarMesas();
   }
 
   ngOnDestroy(): void {
@@ -97,6 +103,8 @@ export class Header implements OnInit, OnDestroy {
       cliente: '',
       tipoPedido: this.tiposPedido[0],
       observacao: '',
+      endereco: '',
+      mesaId: null,
       itens: [{ itemId: null, quantidade: 1 }]
     };
     this.modalCriarAberto = true;
@@ -138,10 +146,22 @@ export class Header implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.novoPedido.tipoPedido === 'Entrega' && !this.novoPedido.endereco.trim()) {
+      this.exibirToast('Informe o endereco para entrega.', 'erro');
+      return;
+    }
+
+    if (this.novoPedido.tipoPedido === 'Restaurante' && !this.novoPedido.mesaId) {
+      this.exibirToast('Selecione a mesa.', 'erro');
+      return;
+    }
+
     const payload = {
       cliente: this.novoPedido.cliente.trim() || undefined,
       tipoPedido: this.novoPedido.tipoPedido,
       observacao: this.novoPedido.observacao.trim() || undefined,
+      endereco: this.novoPedido.tipoPedido === 'Entrega' ? this.novoPedido.endereco.trim() : undefined,
+      mesaId: this.novoPedido.tipoPedido === 'Restaurante' ? this.novoPedido.mesaId ?? undefined : undefined,
       itens: itensValidos
     };
 
@@ -209,6 +229,16 @@ export class Header implements OnInit, OnDestroy {
         console.error('Erro ao carregar itens', err);
         this.itensDisponiveis = [];
         this.carregandoItens = false;
+      }
+    });
+  }
+
+  private carregarMesas(): void {
+    this.mesaService.listar().subscribe({
+      next: (mesas) => (this.mesas = mesas),
+      error: (err) => {
+        console.error('Erro ao carregar mesas', err);
+        this.mesas = [];
       }
     });
   }

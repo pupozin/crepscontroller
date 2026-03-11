@@ -54,6 +54,7 @@
     <li><a routerLink="/abertos" (click)="closeMenu()">Pedidos abertos</a></li>
     <li><a routerLink="/fechados" (click)="closeMenu()">Pedidos fechados</a></li>
     <li><a routerLink="/itens" (click)="closeMenu()">Itens</a></li>
+    <li><a routerLink="/mesas" (click)="closeMenu()">Mesas</a></li>
     <li><a routerLink="/dados" (click)="closeMenu()">Dados</a></li>
     <li><a routerLink="/usuarios" (click)="closeMenu()">Usuarios</a></li>
     <li><a routerLink="/empresa" (click)="closeMenu()">Empresa</a></li>
@@ -74,6 +75,20 @@
     <select [(ngModel)]="novoPedido.tipoPedido">
       <option *ngFor="let tipo of tiposPedido" [value]="tipo">{{ tipo }}</option>
     </select>
+
+    <div *ngIf="novoPedido.tipoPedido === 'Entrega'">
+      <label>Endereco</label>
+      <input type="text" [(ngModel)]="novoPedido.endereco" placeholder="Rua, numero, bairro" />
+    </div>
+
+    <div *ngIf="novoPedido.tipoPedido === 'Restaurante'">
+      <label>Mesa</label>
+      <select [(ngModel)]="novoPedido.mesaId">
+        <option [ngValue]="null" disabled>Selecione a mesa</option>
+        <option *ngFor="let mesa of mesas" [ngValue]="mesa.id">{{ mesa.numero }}</option>
+      </select>
+      <div class="info-itens" *ngIf="!mesas.length">Nenhuma mesa cadastrada.</div>
+    </div>
 
     <label>Observacao</label>
     <textarea [(ngModel)]="novoPedido.observacao" placeholder="Detalhes para a cozinha"></textarea>

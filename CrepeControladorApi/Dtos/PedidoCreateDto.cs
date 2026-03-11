@@ -14,6 +14,12 @@ namespace CrepeControladorApi.Dtos
         [StringLength(250)]
         public string? Observacao { get; set; }
 
+        [StringLength(250)]
+        public string? Endereco { get; set; }
+
+        [Range(1, int.MaxValue)]
+        public int? MesaId { get; set; }
+
         [MinLength(1, ErrorMessage = "O pedido precisa de ao menos um item.")]
         public List<PedidoItemCreateDto> Itens { get; set; } = new();
 

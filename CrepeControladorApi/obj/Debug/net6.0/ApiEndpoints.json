@@ -331,6 +331,80 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "CrepeControladorApi.Controllers.MesasController",
+    "Method": "Listar",
+    "RelativePath": "api/Mesas",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "empresaId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.MesasController",
+    "Method": "Criar",
+    "RelativePath": "api/Mesas",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mesa",
+        "Type": "CrepeControladorApi.Models.Mesa",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.MesasController",
+    "Method": "Atualizar",
+    "RelativePath": "api/Mesas/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "mesa",
+        "Type": "CrepeControladorApi.Models.Mesa",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.MesasController",
+    "Method": "Excluir",
+    "RelativePath": "api/Mesas/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "empresaId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
     "Method": "ObterPedidos",
     "RelativePath": "api/Pedidos",

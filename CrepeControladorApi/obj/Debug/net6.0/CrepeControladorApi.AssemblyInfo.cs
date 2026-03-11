@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CrepeControladorApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c31decc22f99e13c8c3da114f2577c80d848d653")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a5463b2ca714446d9d224561773ff6a3ae584858")]
 [assembly: System.Reflection.AssemblyProductAttribute("CrepeControladorApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CrepeControladorApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

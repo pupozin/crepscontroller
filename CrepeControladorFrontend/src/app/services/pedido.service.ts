@@ -15,6 +15,9 @@ export interface PedidoResumo {
   dataConclusao?: string | null;
   valorTotal: number;
   empresaId: number;
+  endereco?: string | null;
+  mesaId?: number | null;
+  mesaNumero?: string | null;
 }
 
 export interface PedidoItemDetalhe {
@@ -60,6 +63,8 @@ export interface PedidoCreatePayload {
   cliente?: string;
   tipoPedido: string;
   observacao?: string;
+  endereco?: string | null;
+  mesaId?: number | null;
   itens: PedidoItemCreatePayload[];
   empresaId?: number;
 }
@@ -69,6 +74,8 @@ export interface PedidoUpdatePayload {
   tipoPedido: string;
   status: string;
   observacao?: string;
+  endereco?: string | null;
+  mesaId?: number | null;
   itens: PedidoItemCreatePayload[];
   empresaId?: number;
 }

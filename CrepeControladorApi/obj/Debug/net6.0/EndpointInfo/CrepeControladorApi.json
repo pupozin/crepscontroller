@@ -554,6 +554,132 @@
         }
       }
     },
+    "/api/Mesas": {
+      "get": {
+        "tags": [
+          "Mesas"
+        ],
+        "parameters": [
+          {
+            "name": "empresaId",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Mesas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mesa"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mesa"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mesa"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Mesas/{id}": {
+      "put": {
+        "tags": [
+          "Mesas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mesa"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mesa"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mesa"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Mesas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "empresaId",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Pedidos": {
       "get": {
         "tags": [
@@ -935,6 +1061,60 @@
   },
   "components": {
     "schemas": {
+      "Empresa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "seguimento": {
+            "type": "string",
+            "nullable": true
+          },
+          "usuarios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Usuario"
+            },
+            "nullable": true
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "nullable": true
+          },
+          "pedidos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pedido"
+            },
+            "nullable": true
+          },
+          "mesas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mesa"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "EmpresaUpdateDto": {
         "required": [
           "cnpj",
@@ -962,6 +1142,41 @@
             "maxLength": 200,
             "minLength": 1,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "preco": {
+            "type": "number",
+            "format": "double"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "empresaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "empresa": {
+            "$ref": "#/components/schemas/Empresa"
+          },
+          "itensPedido": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItensPedido"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1026,6 +1241,42 @@
         },
         "additionalProperties": false
       },
+      "ItensPedido": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pedidoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pedido": {
+            "$ref": "#/components/schemas/Pedido"
+          },
+          "itemId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "item": {
+            "$ref": "#/components/schemas/Item"
+          },
+          "quantidade": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "precoUnitario": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalItem": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "LoginRequestDto": {
         "required": [
           "email",
@@ -1042,6 +1293,106 @@
             "maxLength": 128,
             "minLength": 8,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Mesa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numero": {
+            "type": "string",
+            "nullable": true
+          },
+          "empresaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ativa": {
+            "type": "boolean"
+          },
+          "empresa": {
+            "$ref": "#/components/schemas/Empresa"
+          },
+          "pedidos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pedido"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Pedido": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigo": {
+            "type": "string",
+            "nullable": true
+          },
+          "cliente": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoPedido": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataCriacao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataConclusao": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "valorTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "endereco": {
+            "type": "string",
+            "nullable": true
+          },
+          "mesaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "empresaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "empresa": {
+            "$ref": "#/components/schemas/Empresa"
+          },
+          "mesa": {
+            "$ref": "#/components/schemas/Mesa"
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItensPedido"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1068,6 +1419,19 @@
             "maxLength": 250,
             "minLength": 0,
             "type": "string",
+            "nullable": true
+          },
+          "endereco": {
+            "maxLength": 250,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "mesaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "itens": {
@@ -1149,6 +1513,40 @@
             "minimum": 1,
             "type": "integer",
             "format": "int32"
+          },
+          "endereco": {
+            "maxLength": 250,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "mesaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Perfil": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "usuarios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Usuario"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1184,6 +1582,42 @@
             "minLength": 1,
             "type": "string",
             "format": "email"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "senhaHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "empresaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "perfilId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "empresa": {
+            "$ref": "#/components/schemas/Empresa"
+          },
+          "perfil": {
+            "$ref": "#/components/schemas/Perfil"
           }
         },
         "additionalProperties": false

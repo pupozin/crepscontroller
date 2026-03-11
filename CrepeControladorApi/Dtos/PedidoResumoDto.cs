@@ -14,5 +14,8 @@ namespace CrepeControladorApi.Dtos
         public DateTime? DataConclusao { get; set; }
         public decimal ValorTotal { get; set; }
         public int EmpresaId { get; set; }
+        public string? Endereco { get; set; }
+        public int? MesaId { get; set; }
+        public string? MesaNumero { get; set; }
     }
 }
