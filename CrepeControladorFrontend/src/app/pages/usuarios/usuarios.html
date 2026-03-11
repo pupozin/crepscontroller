@@ -6,15 +6,21 @@
   <div class="estado" *ngIf="carregando">Carregando...</div>
   <div class="estado erro" *ngIf="erro">{{ erro }}</div>
 
+  <div class="acoes-aba">
+    <button class="btn-acao" type="button" (click)="abrirCriar()">
+      <i class="fa-solid fa-plus"></i>
+      Usuário
+    </button>
+  </div>
+
   <div class="aba-tipos">
     <div class="lista-processos usuarios-lista" *ngIf="usuarios.length">
       <div *ngFor="let u of usuarios" class="linha-processo">
         <span class="codigo">{{ u.nome }}</span>
         <span><i class="fa-solid fa-envelope"></i> {{ u.email }}</span>
-        <span><i class="fa-solid fa-id-card"></i> {{ u.perfilNome || ('Perfil ' + u.perfilId) }}</span>
-        <span><i class="fa-solid fa-building"></i> Empresa {{ u.empresaId }}</span>
+        <span><i class="fa-solid fa-id-card"></i> {{ u.perfilNome }}</span>
         <button class="btn-detalhes" type="button" (click)="abrirEdicao(u)">Editar</button>
-        <button class="btn-acao" type="button" (click)="excluir(u)">Excluir</button>
+        <button class="btn-acao" type="button" (click)="abrirExcluir(u)">Excluir</button>
       </div>
     </div>
 
@@ -24,13 +30,30 @@
   </div>
 </div>
 
+<div class="modal-overlay" *ngIf="modalExcluirAberto" (click)="cancelarExcluir()">
+  <div class="modal-excluir" (click)="$event.stopPropagation()">
+    <h2>Excluir usuário</h2>
+    <p>Tem certeza que deseja excluir {{ usuarioExclusao?.nome }}?</p>
+    <div class="modal-actions">
+      <button class="btn-cancelar" (click)="cancelarExcluir()">Cancelar</button>
+      <button class="btn-concluir" (click)="confirmarExcluir()" [disabled]="carregando">
+        {{ carregando ? 'Excluindo...' : 'Excluir' }}
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" *ngIf="modalEditarAberto" (click)="fecharModal()">
   <div class="modal-editar" (click)="$event.stopPropagation()">
-    <h2>Editar usuário</h2>
+    <h2>{{ usuarioEdicao?.id ? 'Editar usuário' : 'Novo usuário' }}</h2>
     <label>Nome</label>
     <input [(ngModel)]="usuarioEdicao!.nome" type="text" />
     <label>Email</label>
     <input [(ngModel)]="usuarioEdicao!.email" type="email" />
+    <label>Perfil</label>
+    <select [(ngModel)]="usuarioEdicao!.perfilId">
+      <option *ngFor="let p of perfis" [ngValue]="p.id">{{ p.nome }}</option>
+    </select>
 
     <div class="modal-actions">
       <button class="btn-cancelar" (click)="fecharModal()">Cancelar</button>

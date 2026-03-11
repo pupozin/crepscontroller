@@ -457,6 +457,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "CrepeControladorApi.Controllers.PerfisController",
+    "Method": "Listar",
+    "RelativePath": "api/Perfis",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "CrepeControladorApi.Controllers.UsuariosController",
     "Method": "ListarPorEmpresa",
     "RelativePath": "api/Usuarios",
@@ -468,6 +478,22 @@
         "Name": "empresaId",
         "Type": "System.Int32",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.UsuariosController",
+    "Method": "Criar",
+    "RelativePath": "api/Usuarios",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "CrepeControladorApi.Dtos.UsuarioCreateDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
+using CrepeControladorApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,22 +22,76 @@ namespace CrepeControladorApi.Controllers
         [HttpGet]
         public async Task<IActionResult> ListarPorEmpresa([FromQuery] int empresaId)
         {
-            var usuarios = await _context.Usuarios
-                .FromSqlRaw("SELECT * FROM \"sp_Admin_Usuarios_ListarPorEmpresa\"({0})", empresaId)
-                .AsNoTracking()
-                .ToListAsync();
+            var lista = new List<object>();
+            var connection = _context.Database.GetDbConnection();
+            var shouldClose = connection.State != System.Data.ConnectionState.Open;
 
-            var perfis = await _context.Perfis.AsNoTracking().ToDictionaryAsync(p => p.Id, p => p.Nome);
-
-            return Ok(usuarios.Select(u => new
+            if (shouldClose)
             {
-                u.Id,
-                u.Email,
-                u.Nome,
-                u.EmpresaId,
-                u.PerfilId,
-                PerfilNome = perfis.TryGetValue(u.PerfilId, out var nomePerfil) ? nomePerfil : string.Empty
-            }));
+                await connection.OpenAsync();
+                await connection.EnsureApplicationTimeZoneAsync();
+            }
+
+            try
+            {
+                await using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM \"sp_Admin_Usuarios_ListarPorEmpresa\"(@EmpresaId)";
+                var p = command.CreateParameter();
+                p.ParameterName = "@EmpresaId";
+                p.Value = empresaId;
+                command.Parameters.Add(p);
+
+                await using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    lista.Add(new
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        Email = reader.GetString(reader.GetOrdinal("Email")),
+                        Nome = reader.GetString(reader.GetOrdinal("Nome")),
+                        PerfilId = reader.GetInt32(reader.GetOrdinal("PerfilId")),
+                        PerfilNome = reader.IsDBNull(reader.GetOrdinal("PerfilNome")) ? string.Empty : reader.GetString(reader.GetOrdinal("PerfilNome"))
+                    });
+                }
+            }
+            finally
+            {
+                if (shouldClose)
+                {
+                    await connection.CloseAsync();
+                }
+            }
+
+            return Ok(lista);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Criar([FromBody] UsuarioCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var perfilExiste = await _context.Perfis.AnyAsync(p => p.Id == dto.PerfilId);
+            var empresaExiste = await _context.Empresas.AnyAsync(e => e.Id == dto.EmpresaId);
+            if (!perfilExiste || !empresaExiste)
+            {
+                return BadRequest("Perfil ou empresa inválidos.");
+            }
+
+            var usuario = new Models.Usuario
+            {
+                Email = dto.Email,
+                Nome = dto.Nome,
+                PerfilId = dto.PerfilId,
+                EmpresaId = dto.EmpresaId,
+                Senha = "123456"
+            };
+
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(ListarPorEmpresa), new { empresaId = dto.EmpresaId }, new { usuario.Id, usuario.Email, usuario.Nome, usuario.PerfilId, usuario.EmpresaId });
         }
 
         [HttpPut("{id:int}")]

@@ -4,6 +4,28 @@
   background-color: var(--cor-primaria);
 }
 
+.acoes-aba {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  position: fixed;
+  margin-top: -110px !important;
+  right: 350px;
+  z-index: 99;
+
+  .btn-acao {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--cor-secundaria);
+    color: #2d2012;
+    border-radius: 20px;
+    font-size: clamp(14px, 3.5vw, 16px);
+    padding: clamp(8px, 2.5vw, 10px) clamp(16px, 4vw, 20px);
+    border: none;
+  }
+}
+
 .estado {
   margin: 10px 0;
 }
@@ -13,7 +35,7 @@
 }
 
 .usuarios-lista .linha-processo {
-  grid-template-columns: 1.4fr 1.2fr 0.8fr 0.8fr auto auto;
+  grid-template-columns: 1.6fr 1.4fr 1fr auto auto;
 }
 
 .modal-overlay {
@@ -29,28 +51,57 @@
   z-index: 9999;
 }
 
-.modal-editar {
-  background: rgba(99, 76, 52, 0.97);
+.modal-editar,
+.modal-excluir {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(99, 76, 52, 0.96);
   color: var(--cor-branca);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 24px;
   width: min(460px, 90vw);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 }
 
+.modal-editar h2,
+.modal-excluir h2 {
+  font-size: clamp(18px, 4vw, 20px);
+  margin: 0 0 15px;
+}
+
 .modal-editar label {
-  display: block;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  font-weight: 600;
 }
 
 .modal-editar input {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--cor-branca);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: clamp(8px, 2.5vw, 10px) 14px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--cor-primaria);
+}
+
+.modal-excluir p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.modal-editar select {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: clamp(8px, 2.5vw, 10px) 14px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--cor-primaria);
+}
+
+@media (max-width: 850px) {
+  .acoes-aba {
+    margin: 0 0 15px;
+    right: 15px;
+  }
 }
 
 .modal-actions {

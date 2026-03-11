@@ -710,6 +710,18 @@
         }
       }
     },
+    "/api/Perfis": {
+      "get": {
+        "tags": [
+          "Perfis"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Usuarios": {
       "get": {
         "tags": [
@@ -725,6 +737,35 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioCreateDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -999,6 +1040,37 @@
               "$ref": "#/components/schemas/PedidoItemCreateDto"
             },
             "nullable": true
+          },
+          "empresaId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UsuarioCreateDto": {
+        "required": [
+          "email",
+          "empresaId",
+          "nome",
+          "perfilId"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "nome": {
+            "maxLength": 150,
+            "minLength": 1,
+            "type": "string"
+          },
+          "perfilId": {
+            "type": "integer",
+            "format": "int32"
           },
           "empresaId": {
             "type": "integer",

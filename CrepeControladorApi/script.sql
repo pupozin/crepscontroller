@@ -88,15 +88,23 @@ RETURNS TABLE(
     "Id" INT,
     "Email" TEXT,
     "Nome" TEXT,
-    "Senha" TEXT,
-    "EmpresaId" INT,
-    "PerfilId" INT
+    "PerfilId" INT,
+    "PerfilNome" TEXT
 )
-LANGUAGE sql
+LANGUAGE plpgsql
 AS $$
-    SELECT "Id", "Email", "Nome", "Senha", "EmpresaId", "PerfilId"
-    FROM "Usuarios"
-    WHERE "EmpresaId" = empresa_id;
+BEGIN
+    RETURN QUERY
+    SELECT
+        u."Id",
+        u."Email",
+        u."Nome",
+        u."PerfilId",
+        COALESCE(p."Nome", '') AS "PerfilNome"
+    FROM "Usuarios" u
+    LEFT JOIN "Perfis" p ON p."Id" = u."PerfilId"
+    WHERE u."EmpresaId" = empresa_id;
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION "sp_Admin_Empresa_Obter"(empresa_id INT)
