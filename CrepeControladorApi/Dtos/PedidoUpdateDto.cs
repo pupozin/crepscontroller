@@ -22,6 +22,7 @@ namespace CrepeControladorApi.Dtos
         public List<PedidoItemCreateDto> Itens { get; set; } = new();
 
         [Required]
+        [Range(1, int.MaxValue)]
         public int EmpresaId { get; set; }
     }
 }

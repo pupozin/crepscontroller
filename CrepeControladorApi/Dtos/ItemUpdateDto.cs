@@ -14,6 +14,7 @@ namespace CrepeControladorApi.Dtos
         public bool Ativo { get; set; } = true;
 
         [Required]
+        [Range(1, int.MaxValue)]
         public int EmpresaId { get; set; }
     }
 }

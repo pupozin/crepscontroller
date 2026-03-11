@@ -89,4 +89,13 @@ C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net6.0\re
 C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net6.0\CrepeControladorApi.pdb
 C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net6.0\CrepeControladorApi.genruntimeconfig.cache
 C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net6.0\ref\CrepeControladorApi.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\bin\Debug\net6.0\System.Security.Permissions.dll
 C:\Users\Gabriel\Desktop\crepscontroller\CrepeControladorApi\obj\Debug\net6.0\staticwebassets.upToDateCheck.txt

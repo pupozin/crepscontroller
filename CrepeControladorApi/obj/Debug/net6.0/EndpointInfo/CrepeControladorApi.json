@@ -124,6 +124,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -162,6 +164,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -200,6 +204,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -222,6 +228,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -260,6 +268,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -298,6 +308,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -336,6 +348,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -358,6 +372,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -422,6 +438,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -482,6 +500,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -544,6 +564,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -604,6 +626,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -673,6 +697,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -702,6 +728,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -731,6 +759,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -760,6 +790,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -794,6 +826,8 @@
             "name": "empresaId",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
               "format": "int32"
             }
@@ -954,6 +988,8 @@
             "type": "boolean"
           },
           "empresaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32"
           }
@@ -982,6 +1018,8 @@
             "type": "boolean"
           },
           "empresaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32"
           }
@@ -1001,7 +1039,8 @@
             "format": "email"
           },
           "senha": {
-            "minLength": 1,
+            "maxLength": 128,
+            "minLength": 8,
             "type": "string"
           }
         },
@@ -1040,6 +1079,8 @@
             "nullable": true
           },
           "empresaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32"
           }
@@ -1104,6 +1145,8 @@
             "nullable": true
           },
           "empresaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32"
           }
@@ -1123,7 +1166,9 @@
             "format": "email"
           },
           "senha": {
-            "minLength": 4,
+            "maxLength": 128,
+            "minLength": 8,
+            "pattern": "^(?=.*[a-zA-Z])(?=.*\\d).+$",
             "type": "string"
           }
         },
@@ -1168,6 +1213,8 @@
             "format": "int32"
           },
           "empresaId": {
+            "maximum": 2147483647,
+            "minimum": 1,
             "type": "integer",
             "format": "int32"
           }

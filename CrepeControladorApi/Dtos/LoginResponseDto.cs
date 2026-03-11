@@ -1,3 +1,5 @@
+using System;
+
 namespace CrepeControladorApi.Dtos
 {
     public class LoginResponseDto
@@ -9,5 +11,7 @@ namespace CrepeControladorApi.Dtos
         public string EmpresaNome { get; set; } = string.Empty;
         public int PerfilId { get; set; }
         public string PerfilNome { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+        public DateTime ExpiresAtUtc { get; set; }
     }
 }

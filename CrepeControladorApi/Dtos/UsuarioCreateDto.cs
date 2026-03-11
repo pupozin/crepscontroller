@@ -17,6 +17,7 @@ namespace CrepeControladorApi.Dtos
         public int PerfilId { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue)]
         public int EmpresaId { get; set; }
     }
 }

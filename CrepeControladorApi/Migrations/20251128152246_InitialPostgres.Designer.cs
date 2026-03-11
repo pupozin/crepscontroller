@@ -209,10 +209,10 @@ namespace CrepeControladorApi.Migrations
                     b.Property<int>("PerfilId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Senha")
-                        .IsRequired()
+                    b.Property<string>("SenhaHash")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("Senha");
 
                     b.HasKey("Id");
 

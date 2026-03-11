@@ -13,11 +13,18 @@ export interface UsuarioAutenticado {
   empresaNome?: string;
   perfilId: number;
   perfilNome?: string;
+  token: string;
+  expiresAtUtc: string | Date;
 }
 
 interface LoginRequest {
   email: string;
   senha: string;
+}
+
+interface LoginResponse extends UsuarioAutenticado {
+  token: string;
+  expiresAtUtc: string;
 }
 
 interface PrimeiroAcessoResposta {
@@ -42,7 +49,7 @@ export class AuthService {
   login(email: string, senha: string): Observable<UsuarioAutenticado> {
     const payload: LoginRequest = { email, senha };
     return this.http
-      .post<UsuarioAutenticado>(this.buildUrl('auth/login'), payload)
+      .post<LoginResponse>(this.buildUrl('auth/login'), payload)
       .pipe(tap((usuario) => this.salvar(usuario)));
   }
 
@@ -54,7 +61,7 @@ export class AuthService {
 
   definirPrimeiroAcesso(email: string, senha: string): Observable<UsuarioAutenticado> {
     return this.http
-      .post<UsuarioAutenticado>(this.buildUrl('auth/primeiro-acesso/definir'), { email, senha })
+      .post<LoginResponse>(this.buildUrl('auth/primeiro-acesso/definir'), { email, senha })
       .pipe(tap((usuario) => this.salvar(usuario)));
   }
 
@@ -72,13 +79,36 @@ export class AuthService {
     return this.usuarioSubject.value?.empresaId ?? null;
   }
 
+  obterToken(): string | null {
+    const usuario = this.usuarioSubject.value;
+    if (!usuario) return null;
+    const exp = new Date(usuario.expiresAtUtc);
+    if (isNaN(exp.getTime()) || exp <= new Date()) {
+      this.logout();
+      return null;
+    }
+    return usuario.token;
+  }
+
   estaAutenticado(): boolean {
     return this.usuarioValido(this.usuarioSubject.value);
   }
 
-  private salvar(usuario: UsuarioAutenticado): void {
-    this.usuarioSubject.next(usuario);
-    localStorage.setItem(this.storageKey, JSON.stringify(usuario));
+  private salvar(usuario: LoginResponse): void {
+    const normalizado: UsuarioAutenticado = {
+      id: usuario.id,
+      email: usuario.email,
+      nome: usuario.nome,
+      empresaId: usuario.empresaId,
+      empresaNome: usuario.empresaNome,
+      perfilId: usuario.perfilId,
+      perfilNome: usuario.perfilNome,
+      token: usuario.token,
+      expiresAtUtc: usuario.expiresAtUtc
+    };
+
+    this.usuarioSubject.next(normalizado);
+    localStorage.setItem(this.storageKey, JSON.stringify(normalizado));
   }
 
   private lerDoStorage(): UsuarioAutenticado | null {
@@ -98,8 +128,15 @@ export class AuthService {
       usuario.empresaId > 0 &&
       usuario.perfilId > 0 &&
       usuario.email &&
-      usuario.nome
+      usuario.nome &&
+      usuario.token &&
+      this.tokenValido(usuario.expiresAtUtc)
     );
+  }
+
+  private tokenValido(expiresAtUtc: string | Date): boolean {
+    const exp = new Date(expiresAtUtc);
+    return !isNaN(exp.getTime()) && exp > new Date();
   }
 
   private buildUrl(path: string): string {

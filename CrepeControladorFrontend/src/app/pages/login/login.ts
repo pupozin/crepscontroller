@@ -12,8 +12,8 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./login.scss']
 })
 export class LoginPage {
-  email = 'admin@exemplo.com';
-  senha = '123456';
+  email = '';
+  senha = '';
   carregando = false;
   erro = '';
 
@@ -41,7 +41,7 @@ export class LoginPage {
       },
       error: (err) => {
         console.error('Falha no login', err);
-        this.erro = 'Credenciais inv\u00e1lidas. Tente novamente.';
+        this.erro = 'Credenciais inválidas. Tente novamente.';
         this.carregando = false;
       }
     });
@@ -73,7 +73,7 @@ export class LoginPage {
       },
       error: (err) => {
         console.error(err);
-        this.erroPrimeiro = 'Usu\u00e1rio inexistente ou j\u00e1 possui senha.';
+        this.erroPrimeiro = 'Usuário inexistente ou já possui senha.';
         this.carregandoPrimeiro = false;
       }
     });
@@ -82,8 +82,8 @@ export class LoginPage {
   definirSenhaPrimeiro(): void {
     if (this.carregandoPrimeiro) return;
     this.erroPrimeiro = '';
-    if (!this.senhaPrimeiro || this.senhaPrimeiro.length < 4) {
-      this.erroPrimeiro = 'Informe uma senha com pelo menos 4 caracteres.';
+    if (!this.senhaEhValida(this.senhaPrimeiro)) {
+      this.erroPrimeiro = 'A senha deve ter 8 a 128 caracteres, incluir letras e números.';
       return;
     }
     if (this.senhaPrimeiro !== this.senhaPrimeiroConfirma) {
@@ -102,9 +102,17 @@ export class LoginPage {
       },
       error: (err) => {
         console.error(err);
-        this.erroPrimeiro = 'N\u00e3o foi poss\u00edvel definir a senha. Tente novamente.';
+        this.erroPrimeiro = 'Não foi possível definir a senha. Tente novamente.';
         this.carregandoPrimeiro = false;
       }
     });
+  }
+
+  private senhaEhValida(senha: string): boolean {
+    if (!senha) return false;
+    if (senha.length < 8 || senha.length > 128) return false;
+    const temLetra = /[a-zA-Z]/.test(senha);
+    const temNumero = /\d/.test(senha);
+    return temLetra && temNumero;
   }
 }

@@ -1,31 +1,43 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
 using CrepeControladorApi.Models;
+using CrepeControladorApi.Security;
 using CrepeControladorApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CrepeControladorApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PedidosController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly PedidoQueryService _pedidoQueryService;
+        private readonly ICurrentUserContext _currentUser;
+        private readonly ILogger<PedidosController> _logger;
 
-        public PedidosController(AppDbContext context, PedidoQueryService pedidoQueryService)
+        public PedidosController(AppDbContext context, PedidoQueryService pedidoQueryService, ICurrentUserContext currentUser, ILogger<PedidosController> logger)
         {
             _context = context;
             _pedidoQueryService = pedidoQueryService;
+            _currentUser = currentUser;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterPedidos([FromQuery] int empresaId)
+        public async Task<IActionResult> ObterPedidos([FromQuery][Range(1, int.MaxValue)] int empresaId)
         {
+            if (!_currentUser.EmpresaAutorizada(empresaId))
+            {
+                return Forbid();
+            }
+
             var pedidos = await _context.Pedidos
                 .AsNoTracking()
                 .Where(p => p.EmpresaId == empresaId)
@@ -47,8 +59,13 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> ObterPedido(int id, [FromQuery] int empresaId)
+        public async Task<IActionResult> ObterPedido(int id, [FromQuery][Range(1, int.MaxValue)] int empresaId)
         {
+            if (!_currentUser.EmpresaAutorizada(empresaId))
+            {
+                return Forbid();
+            }
+
             var pedido = await _context.Pedidos
                 .AsNoTracking()
                 .Include(p => p.Itens)
@@ -90,8 +107,13 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("pesquisar")]
-        public async Task<IActionResult> PesquisarPedidos([FromQuery] string termo, [FromQuery] int empresaId)
+        public async Task<IActionResult> PesquisarPedidos([FromQuery] string termo, [FromQuery][Range(1, int.MaxValue)] int empresaId)
         {
+            if (!_currentUser.EmpresaAutorizada(empresaId))
+            {
+                return Forbid();
+            }
+
             if (string.IsNullOrWhiteSpace(termo))
             {
                 return BadRequest("Informe um termo para pesquisa.");
@@ -102,8 +124,13 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("abertos")]
-        public async Task<IActionResult> ListarPedidosAbertos([FromQuery] string tipoPedido, [FromQuery] int empresaId)
+        public async Task<IActionResult> ListarPedidosAbertos([FromQuery] string tipoPedido, [FromQuery][Range(1, int.MaxValue)] int empresaId)
         {
+            if (!_currentUser.EmpresaAutorizada(empresaId))
+            {
+                return Forbid();
+            }
+
             if (string.IsNullOrWhiteSpace(tipoPedido))
             {
                 return BadRequest("Informe o tipo de pedido.");
@@ -114,8 +141,13 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("grupo-status")]
-        public async Task<IActionResult> ListarPorGrupoStatus([FromQuery] string grupo, [FromQuery] int empresaId)
+        public async Task<IActionResult> ListarPorGrupoStatus([FromQuery] string grupo, [FromQuery][Range(1, int.MaxValue)] int empresaId)
         {
+            if (!_currentUser.EmpresaAutorizada(empresaId))
+            {
+                return Forbid();
+            }
+
             if (string.IsNullOrWhiteSpace(grupo))
             {
                 return BadRequest("Informe o grupo de status.");
@@ -133,13 +165,19 @@ namespace CrepeControladorApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
+            if (!_currentUser.EmpresaAutorizada(pedidoDto.EmpresaId))
+            {
+                return Forbid();
+            }
+
             if (pedidoDto.Itens == null || pedidoDto.Itens.Count == 0)
             {
                 ModelState.AddModelError(nameof(pedidoDto.Itens), "Informe ao menos um item para o pedido.");
                 return ValidationProblem(ModelState);
             }
 
-            var codigoPedido = await GerarCodigoPedidoAsync();
+            var empresaId = _currentUser.EmpresaId!.Value;
+            var codigoPedido = await GerarCodigoPedidoAsync(empresaId);
 
             var pedido = new Pedido
             {
@@ -148,14 +186,14 @@ namespace CrepeControladorApi.Controllers
                 TipoPedido = pedidoDto.TipoPedido,
                 Observacao = pedidoDto.Observacao,
                 DataCriacao = DateTime.UtcNow,
-                EmpresaId = pedidoDto.EmpresaId
+                EmpresaId = empresaId
             };
 
             decimal valorTotal = 0m;
 
             foreach (var itemDto in pedidoDto.Itens)
             {
-                var item = await _context.Itens.FirstOrDefaultAsync(i => i.Id == itemDto.ItemId && i.EmpresaId == pedidoDto.EmpresaId);
+                var item = await _context.Itens.FirstOrDefaultAsync(i => i.Id == itemDto.ItemId && i.EmpresaId == empresaId);
                 if (item == null)
                 {
                     ModelState.AddModelError(nameof(pedidoDto.Itens), $"Item com Id {itemDto.ItemId} nao foi encontrado.");
@@ -179,6 +217,7 @@ namespace CrepeControladorApi.Controllers
 
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Pedido {PedidoId} criado na empresa {EmpresaId} por {UsuarioId}", pedido.Id, empresaId, _currentUser.UsuarioId);
 
             return Created($"api/pedidos/{pedido.Id}", new
             {
@@ -202,6 +241,11 @@ namespace CrepeControladorApi.Controllers
             if (!ModelState.IsValid)
             {
                 return ValidationProblem(ModelState);
+            }
+
+            if (!_currentUser.EmpresaAutorizada(pedidoDto.EmpresaId))
+            {
+                return Forbid();
             }
 
             var pedido = await _context.Pedidos
@@ -272,6 +316,7 @@ namespace CrepeControladorApi.Controllers
             }
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Pedido {PedidoId} atualizado na empresa {EmpresaId} por {UsuarioId}", pedido.Id, pedido.EmpresaId, _currentUser.UsuarioId);
 
             return Ok(new
             {
@@ -301,9 +346,10 @@ namespace CrepeControladorApi.Controllers
                 || string.Equals(status, "Cancelado", StringComparison.OrdinalIgnoreCase);
         }
 
-        private async Task<string> GerarCodigoPedidoAsync()
+        private async Task<string> GerarCodigoPedidoAsync(int empresaId)
         {
             var ultimoId = await _context.Pedidos
+                .Where(p => p.EmpresaId == empresaId)
                 .OrderByDescending(p => p.Id)
                 .Select(p => p.Id)
                 .FirstOrDefaultAsync();
@@ -313,8 +359,13 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("buscar")]
-        public async Task<IActionResult> BuscarPedidos([FromQuery] string termo, [FromQuery] int empresaId)
+        public async Task<IActionResult> BuscarPedidos([FromQuery] string termo, [FromQuery][Range(1, int.MaxValue)] int empresaId)
         {
+            if (!_currentUser.EmpresaAutorizada(empresaId))
+            {
+                return Forbid();
+            }
+
             var pedidos = await _pedidoQueryService.PesquisarPedidosAsync(termo, empresaId);
             return Ok(pedidos);
         }

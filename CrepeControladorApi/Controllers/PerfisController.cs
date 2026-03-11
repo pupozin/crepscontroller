@@ -1,6 +1,6 @@
 using System.Linq;
-using System.Threading.Tasks;
 using CrepeControladorApi.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +8,7 @@ namespace CrepeControladorApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PerfisController : ControllerBase
     {
         private readonly AppDbContext _context;
