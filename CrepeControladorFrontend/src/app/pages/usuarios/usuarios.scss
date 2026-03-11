@@ -1,0 +1,80 @@
+@use '../pedidos-fechados/pedidos-fechados';
+
+.usuarios-page {
+  background-color: var(--cor-primaria);
+}
+
+.estado {
+  margin: 10px 0;
+}
+
+.estado.erro {
+  color: #f87171;
+}
+
+.usuarios-lista .linha-processo {
+  grid-template-columns: 1.4fr 1.2fr 0.8fr 0.8fr auto auto;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-editar {
+  background: rgba(99, 76, 52, 0.97);
+  color: var(--cor-branca);
+  border-radius: 16px;
+  padding: 24px;
+  width: min(460px, 90vw);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.modal-editar label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.modal-editar input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cor-branca);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn-cancelar {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  color: var(--cor-branca);
+  cursor: pointer;
+}
+
+.btn-concluir {
+  background: var(--cor-secundaria);
+  color: #2d2012;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}

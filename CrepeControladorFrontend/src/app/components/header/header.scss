@@ -98,6 +98,60 @@
   pointer-events: none;
 }
 
+.user-info {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 10px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-weight: 700;
+}
+
+.user-empresa {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.btn-sair {
+  background: var(--cor-branca);
+  color: var(--cor-primaria);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.menu-sair {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--cor-primaria);
+  font-size: 18px;
+  font-weight: 600;
+  padding: 18px 0;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.menu-sair:hover {
+  background-color: var(--cor-primaria);
+  color: var(--cor-branca);
+  padding-left: 35px;
+}
+
 /* SIDEBAR */
 .sidebar {
   position: fixed;
@@ -513,6 +567,14 @@
     margin-left: 0;
     order: 3;
         margin-top: 15px;
+  }
+
+  .user-info {
+    order: 4;
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
   }
 
   .search-bar__input {

@@ -13,6 +13,9 @@ namespace CrepeControladorApi.Data
         public DbSet<Pedido> Pedidos { get; set; } = null!;
         public DbSet<Item> Itens { get; set; } = null!;
         public DbSet<ItensPedido> ItensPedidos { get; set; } = null!;
+        public DbSet<Empresa> Empresas { get; set; } = null!;
+        public DbSet<Usuario> Usuarios { get; set; } = null!;
+        public DbSet<Perfil> Perfis { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,10 +37,22 @@ namespace CrepeControladorApi.Data
                 .HasMaxLength(20)
                 .IsRequired();
 
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.Empresa)
+                .WithMany(e => e.Pedidos)
+                .HasForeignKey(p => p.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Item>()
                 .Property(i => i.Nome)
                 .HasMaxLength(150)
                 .IsRequired();
+
+            modelBuilder.Entity<Item>()
+                .HasOne(i => i.Empresa)
+                .WithMany(e => e.Itens)
+                .HasForeignKey(i => i.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ItensPedido>()
                 .HasOne(ip => ip.Pedido)
@@ -48,6 +63,58 @@ namespace CrepeControladorApi.Data
                 .HasOne(ip => ip.Item)
                 .WithMany(i => i.ItensPedido)
                 .HasForeignKey(ip => ip.ItemId);
+
+            modelBuilder.Entity<Empresa>()
+                .Property(e => e.Cnpj)
+                .HasMaxLength(18)
+                .IsRequired();
+
+            modelBuilder.Entity<Empresa>()
+                .Property(e => e.Nome)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            modelBuilder.Entity<Empresa>()
+                .Property(e => e.RazaoSocial)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            modelBuilder.Entity<Empresa>()
+                .Property(e => e.Seguimento)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            modelBuilder.Entity<Usuario>()
+                .Property(u => u.Email)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            modelBuilder.Entity<Usuario>()
+                .Property(u => u.Nome)
+                .HasMaxLength(150)
+                .IsRequired();
+
+            modelBuilder.Entity<Usuario>()
+                .Property(u => u.Senha)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            modelBuilder.Entity<Usuario>()
+                .HasOne(u => u.Empresa)
+                .WithMany(e => e.Usuarios)
+                .HasForeignKey(u => u.EmpresaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Usuario>()
+                .HasOne(u => u.Perfil)
+                .WithMany(p => p.Usuarios)
+                .HasForeignKey(u => u.PerfilId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Perfil>()
+                .Property(p => p.Nome)
+                .HasMaxLength(100)
+                .IsRequired();
         }
     }
 }

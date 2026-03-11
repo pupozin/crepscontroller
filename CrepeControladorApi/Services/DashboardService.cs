@@ -18,12 +18,13 @@ namespace CrepeControladorApi.Services
             _context = context;
         }
 
-        public Task<List<DashboardHorarioPicoDto>> ObterHorariosPicoPorPeriodo(DateTime dataInicio, DateTime dataFim)
+        public Task<List<DashboardHorarioPicoDto>> ObterHorariosPicoPorPeriodo(DateTime dataInicio, DateTime dataFim, int empresaId)
         {
-            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_Periodo\"(@DataInicio::DATE, @DataFim::DATE)", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_Periodo\"(@DataInicio::DATE, @DataFim::DATE, @EmpresaId)", command =>
             {
                 AddDateParameter(command, "@DataInicio", dataInicio);
                 AddDateParameter(command, "@DataFim", dataFim);
+                AddParameter(command, "@EmpresaId", empresaId);
             }, reader => new DashboardHorarioPicoDto
             {
                 Hora = GetInt32(reader, "Hora"),
@@ -32,12 +33,13 @@ namespace CrepeControladorApi.Services
             });
         }
 
-        public Task<List<DashboardDiaSemanaPicoDto>> ObterHorariosPicoDiaSemanaResumo(DateTime dataInicio, DateTime dataFim)
+        public Task<List<DashboardDiaSemanaPicoDto>> ObterHorariosPicoDiaSemanaResumo(DateTime dataInicio, DateTime dataFim, int empresaId)
         {
-            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_DiaSemanaResumo\"(@DataInicio::DATE, @DataFim::DATE)", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_DiaSemanaResumo\"(@DataInicio::DATE, @DataFim::DATE, @EmpresaId)", command =>
             {
                 AddDateParameter(command, "@DataInicio", dataInicio);
                 AddDateParameter(command, "@DataFim", dataFim);
+                AddParameter(command, "@EmpresaId", empresaId);
             }, reader => new DashboardDiaSemanaPicoDto
             {
                 DiaSemana = GetInt32(reader, "DiaSemana"),
@@ -48,12 +50,13 @@ namespace CrepeControladorApi.Services
             });
         }
 
-        public Task<List<DashboardDiaSemanaDistribuicaoDto>> ObterDistribuicaoDiaSemanaPorHora(DateTime dataInicio, DateTime dataFim)
+        public Task<List<DashboardDiaSemanaDistribuicaoDto>> ObterDistribuicaoDiaSemanaPorHora(DateTime dataInicio, DateTime dataFim, int empresaId)
         {
-            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_DiaSemanaDistribuicao\"(@DataInicio::DATE, @DataFim::DATE)", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_HorariosPico_DiaSemanaDistribuicao\"(@DataInicio::DATE, @DataFim::DATE, @EmpresaId)", command =>
             {
                 AddDateParameter(command, "@DataInicio", dataInicio);
                 AddDateParameter(command, "@DataFim", dataFim);
+                AddParameter(command, "@EmpresaId", empresaId);
             }, reader => new DashboardDiaSemanaDistribuicaoDto
             {
                 DiaSemana = GetInt32(reader, "DiaSemana"),
@@ -64,12 +67,13 @@ namespace CrepeControladorApi.Services
             });
         }
 
-        public async Task<DashboardResumoPeriodoDto> ObterResumoPeriodo(DateTime? dataInicio, DateTime? dataFim)
+        public async Task<DashboardResumoPeriodoDto> ObterResumoPeriodo(DateTime? dataInicio, DateTime? dataFim, int empresaId)
         {
-            var resultado = await ExecuteSingleAsync("SELECT * FROM \"sp_Dashboard_ResumoPeriodo\"(@DataInicio::DATE, @DataFim::DATE)", command =>
+            var resultado = await ExecuteSingleAsync("SELECT * FROM \"sp_Dashboard_ResumoPeriodo\"(@DataInicio::DATE, @DataFim::DATE, @EmpresaId)", command =>
             {
                 AddDateParameter(command, "@DataInicio", dataInicio);
                 AddDateParameter(command, "@DataFim", dataFim);
+                AddParameter(command, "@EmpresaId", empresaId);
             }, reader => new DashboardResumoPeriodoDto
             {
                 QtdePedidos = GetInt32(reader, "QtdePedidos"),
@@ -82,12 +86,13 @@ namespace CrepeControladorApi.Services
             return resultado ?? new DashboardResumoPeriodoDto();
         }
 
-        public Task<List<DashboardItemRankingDto>> ObterItensRanking(DateTime? dataInicio, DateTime? dataFim)
+        public Task<List<DashboardItemRankingDto>> ObterItensRanking(DateTime? dataInicio, DateTime? dataFim, int empresaId)
         {
-            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_ItensRanking\"(@DataInicio::DATE, @DataFim::DATE)", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_ItensRanking\"(@DataInicio::DATE, @DataFim::DATE, @EmpresaId)", command =>
             {
                 AddDateParameter(command, "@DataInicio", dataInicio);
                 AddDateParameter(command, "@DataFim", dataFim);
+                AddParameter(command, "@EmpresaId", empresaId);
             }, reader => new DashboardItemRankingDto
             {
                 ItemId = GetInt32(reader, "ItemId"),
@@ -97,12 +102,13 @@ namespace CrepeControladorApi.Services
             });
         }
 
-        public Task<List<DashboardTipoPedidoDto>> ObterTipoPedido(DateTime? dataInicio, DateTime? dataFim)
+        public Task<List<DashboardTipoPedidoDto>> ObterTipoPedido(DateTime? dataInicio, DateTime? dataFim, int empresaId)
         {
-            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_TipoPedido\"(@DataInicio::DATE, @DataFim::DATE)", command =>
+            return ExecuteListAsync("SELECT * FROM \"sp_Dashboard_TipoPedido\"(@DataInicio::DATE, @DataFim::DATE, @EmpresaId)", command =>
             {
                 AddDateParameter(command, "@DataInicio", dataInicio);
                 AddDateParameter(command, "@DataFim", dataFim);
+                AddParameter(command, "@EmpresaId", empresaId);
             }, reader => new DashboardTipoPedidoDto
             {
                 TipoPedido = reader.GetString(reader.GetOrdinal("TipoPedido")),
@@ -111,9 +117,9 @@ namespace CrepeControladorApi.Services
             });
         }
 
-        public async Task<DashboardPeriodoTotalDto?> ObterPeriodoTotal()
+        public async Task<DashboardPeriodoTotalDto?> ObterPeriodoTotal(int empresaId)
         {
-            var finalizados = _context.Pedidos.Where(p => p.Status == StatusFinalizado);
+            var finalizados = _context.Pedidos.Where(p => p.Status == StatusFinalizado && p.EmpresaId == empresaId);
             if (!await finalizados.AnyAsync())
             {
                 return null;

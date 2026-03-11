@@ -19,25 +19,23 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterItens()
+        public async Task<IActionResult> ObterItens([FromQuery] int empresaId)
         {
             var itens = await _context.Itens
-                .FromSqlRaw("SELECT * FROM \"sp_Item_Obter\"({0})", (int?)null)
                 .AsNoTracking()
+                .Where(i => i.EmpresaId == empresaId)
                 .ToListAsync();
 
             return Ok(itens);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> ObterItem(int id)
+        public async Task<IActionResult> ObterItem(int id, [FromQuery] int empresaId)
         {
-            var itens = await _context.Itens
-                .FromSqlRaw("SELECT * FROM \"sp_Item_Obter\"({0})", id)
+            var item = await _context.Itens
                 .AsNoTracking()
-                .ToListAsync();
-
-            var item = itens.FirstOrDefault();
+                .Where(i => i.Id == id && i.EmpresaId == empresaId)
+                .FirstOrDefaultAsync();
 
             if (item == null)
             {
@@ -59,7 +57,8 @@ namespace CrepeControladorApi.Controllers
             {
                 Nome = itemDto.Nome,
                 Preco = itemDto.Preco,
-                Ativo = itemDto.Ativo
+                Ativo = itemDto.Ativo,
+                EmpresaId = itemDto.EmpresaId
             };
 
             _context.Itens.Add(item);
@@ -70,7 +69,8 @@ namespace CrepeControladorApi.Controllers
                 item.Id,
                 item.Nome,
                 item.Preco,
-                item.Ativo
+                item.Ativo,
+                item.EmpresaId
             });
         }
 
@@ -82,7 +82,7 @@ namespace CrepeControladorApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var item = await _context.Itens.FindAsync(id);
+            var item = await _context.Itens.FirstOrDefaultAsync(i => i.Id == id && i.EmpresaId == itemDto.EmpresaId);
             if (item == null)
             {
                 return NotFound();
@@ -99,7 +99,8 @@ namespace CrepeControladorApi.Controllers
                 item.Id,
                 item.Nome,
                 item.Preco,
-                item.Ativo
+                item.Ativo,
+                item.EmpresaId
             });
         }
 

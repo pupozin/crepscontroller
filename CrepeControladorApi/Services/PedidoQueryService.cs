@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
@@ -12,160 +11,74 @@ namespace CrepeControladorApi.Services
     public class PedidoQueryService
     {
         private readonly AppDbContext _context;
+        private static readonly string[] StatusFechados = { "Finalizado", "Cancelado" };
 
         public PedidoQueryService(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<PedidoResumoDto>> PesquisarPedidosAsync(string termo)
+        public async Task<List<PedidoResumoDto>> PesquisarPedidosAsync(string termo, int empresaId)
         {
-            var connection = _context.Database.GetDbConnection();
-            var shouldClose = connection.State != ConnectionState.Open;
+            var query = _context.Pedidos
+                .AsNoTracking()
+                .Where(p => p.EmpresaId == empresaId);
 
-            if (shouldClose)
+            if (!string.IsNullOrWhiteSpace(termo))
             {
-                await connection.OpenAsync();
-                await connection.EnsureApplicationTimeZoneAsync();
+                termo = termo.Trim().ToLowerInvariant();
+                query = query.Where(p =>
+                    (p.Codigo != null && p.Codigo.ToLower().Contains(termo)) ||
+                    (p.Cliente != null && p.Cliente.ToLower().Contains(termo)));
             }
 
-            try
-            {
-                await using var command = connection.CreateCommand();
-                command.CommandText = @"SELECT *
-                    FROM (
-                        SELECT * FROM ""sp_PesquisarPedidos""(@Termo)
-                    ) AS pedidos(""Id"", ""Codigo"", ""Cliente"", ""TipoPedido"", ""Status"", ""Observacao"", ""DataCriacao"", ""DataConclusao"", ""ValorTotal"")";
-                command.CommandType = CommandType.Text;
-
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "@Termo";
-                parameter.Value = termo ?? string.Empty;
-                command.Parameters.Add(parameter);
-
-                return await MapearPedidosAsync(command);
-            }
-            finally
-            {
-                if (shouldClose)
-                {
-                    await connection.CloseAsync();
-                }
-            }
+            return await MapearPedidosAsync(query.OrderByDescending(p => p.DataCriacao));
         }
 
-        public async Task<List<PedidoResumoDto>> ListarPedidosAbertosPorTipoAsync(string tipoPedido)
+        public Task<List<PedidoResumoDto>> ListarPedidosAbertosPorTipoAsync(string tipoPedido, int empresaId)
         {
-            var connection = _context.Database.GetDbConnection();
-            var shouldClose = connection.State != ConnectionState.Open;
+            var query = _context.Pedidos
+                .AsNoTracking()
+                .Where(p => p.EmpresaId == empresaId &&
+                            p.TipoPedido == tipoPedido &&
+                            !StatusFechados.Contains(p.Status));
 
-            if (shouldClose)
-            {
-                await connection.OpenAsync();
-                await connection.EnsureApplicationTimeZoneAsync();
-            }
-
-            try
-            {
-                await using var command = connection.CreateCommand();
-                command.CommandText = @"SELECT *
-                    FROM (
-                        SELECT * FROM ""sp_Pedidos_ListarAbertosPorTipoPedido""(@TipoPedido)
-                    ) AS pedidos(""Id"", ""Codigo"", ""Cliente"", ""TipoPedido"", ""Status"", ""Observacao"", ""DataCriacao"", ""DataConclusao"", ""ValorTotal"")";
-                command.CommandType = CommandType.Text;
-
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "@TipoPedido";
-                parameter.Value = tipoPedido;
-                command.Parameters.Add(parameter);
-
-                return await MapearPedidosAsync(command);
-            }
-            finally
-            {
-                if (shouldClose)
-                {
-                    await connection.CloseAsync();
-                }
-            }
+            return MapearPedidosAsync(query.OrderByDescending(p => p.DataCriacao));
         }
 
-        public async Task<List<PedidoResumoDto>> ListarPorGrupoStatusAsync(string grupo)
+        public Task<List<PedidoResumoDto>> ListarPorGrupoStatusAsync(string grupo, int empresaId)
         {
-            var connection = _context.Database.GetDbConnection();
-            var shouldClose = connection.State != ConnectionState.Open;
+            var query = _context.Pedidos.AsNoTracking().Where(p => p.EmpresaId == empresaId);
 
-            if (shouldClose)
+            if (string.Equals(grupo, "ABERTOS", StringComparison.OrdinalIgnoreCase))
             {
-                await connection.OpenAsync();
-                await connection.EnsureApplicationTimeZoneAsync();
+                query = query.Where(p => !StatusFechados.Contains(p.Status));
+            }
+            else
+            {
+                query = query.Where(p => StatusFechados.Contains(p.Status));
             }
 
-            try
-            {
-                await using var command = connection.CreateCommand();
-                command.CommandText = @"SELECT *
-                    FROM (
-                        SELECT * FROM ""sp_Pedidos_ListarPorGrupoStatus""(@Grupo)
-                    ) AS pedidos(""Id"", ""Codigo"", ""Cliente"", ""TipoPedido"", ""Status"", ""Observacao"", ""DataCriacao"", ""DataConclusao"", ""ValorTotal"")";
-                command.CommandType = CommandType.Text;
-
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "@Grupo";
-                parameter.Value = grupo;
-                command.Parameters.Add(parameter);
-
-                return await MapearPedidosAsync(command);
-            }
-            finally
-            {
-                if (shouldClose)
-                {
-                    await connection.CloseAsync();
-                }
-            }
+            return MapearPedidosAsync(query.OrderByDescending(p => p.DataCriacao));
         }
 
-        private async Task<List<PedidoResumoDto>> MapearPedidosAsync(DbCommand command)
+        private static async Task<List<PedidoResumoDto>> MapearPedidosAsync(IQueryable<Models.Pedido> query)
         {
-            var resultados = new List<PedidoResumoDto>();
+            var pedidos = await query.ToListAsync();
 
-            await using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            return pedidos.ConvertAll(p => new PedidoResumoDto
             {
-                resultados.Add(new PedidoResumoDto
-                {
-                    Id = GetInt32(reader, "Id", "PedidoId"),
-                    Codigo = reader.GetString(reader.GetOrdinal("Codigo")),
-                    Cliente = reader.IsDBNull(reader.GetOrdinal("Cliente")) ? null : reader.GetString(reader.GetOrdinal("Cliente")),
-                    TipoPedido = reader.GetString(reader.GetOrdinal("TipoPedido")),
-                    Status = reader.GetString(reader.GetOrdinal("Status")),
-                    Observacao = reader.IsDBNull(reader.GetOrdinal("Observacao")) ? null : reader.GetString(reader.GetOrdinal("Observacao")),
-                    DataCriacao = reader.GetDateTime(reader.GetOrdinal("DataCriacao")),
-                    DataConclusao = reader.IsDBNull(reader.GetOrdinal("DataConclusao")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("DataConclusao")),
-                    ValorTotal = reader.GetDecimal(reader.GetOrdinal("ValorTotal"))
-                });
-            }
-
-            return resultados;
-        }
-
-        private static int GetInt32(DbDataReader reader, params string[] columnNames)
-        {
-            foreach (var column in columnNames)
-            {
-                try
-                {
-                    var ordinal = reader.GetOrdinal(column);
-                    return reader.GetInt32(ordinal);
-                }
-                catch (IndexOutOfRangeException)
-                {
-                    // tenta próxima coluna
-                }
-            }
-
-            throw new IndexOutOfRangeException($"Nenhuma das colunas [{string.Join(", ", columnNames)}] foi encontrada.");
+                Id = p.Id,
+                Codigo = p.Codigo,
+                Cliente = p.Cliente,
+                TipoPedido = p.TipoPedido,
+                Status = p.Status,
+                Observacao = p.Observacao,
+                DataCriacao = p.DataCriacao,
+                DataConclusao = p.DataConclusao,
+                ValorTotal = p.ValorTotal,
+                EmpresaId = p.EmpresaId
+            });
         }
     }
 }

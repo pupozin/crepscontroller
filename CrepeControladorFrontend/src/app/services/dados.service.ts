@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface DashboardResumoPeriodo {
   qtdePedidos: number;
@@ -51,7 +52,10 @@ export interface DashboardPeriodoTotal {
 export class DadosService {
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly auth: AuthService
+  ) {}
 
   obterResumo(dataInicio: string, dataFim: string): Observable<DashboardResumoPeriodo> {
     return this.http.get<DashboardResumoPeriodo>(this.buildUrl('dashboard/resumo'), {
@@ -90,11 +94,15 @@ export class DadosService {
   }
 
   obterPeriodoTotal(): Observable<DashboardPeriodoTotal> {
-    return this.http.get<DashboardPeriodoTotal>(this.buildUrl('dashboard/periodo-total'));
+    return this.http.get<DashboardPeriodoTotal>(this.buildUrl('dashboard/periodo-total'), {
+      params: this.buildEmpresaParam()
+    });
   }
 
   private buildPeriodoParams(dataInicio: string, dataFim: string): HttpParams {
-    return new HttpParams().set('dataInicio', dataInicio).set('dataFim', dataFim);
+    let params = this.buildEmpresaParam();
+    params = params.set('dataInicio', dataInicio).set('dataFim', dataFim);
+    return params;
   }
 
   private buildUrl(path: string): string {
@@ -118,5 +126,13 @@ export class DadosService {
 
     const normalizedBase = baseWithSlash.startsWith('/') ? baseWithSlash : `/${baseWithSlash}`;
     return `${normalizedBase}${trimmedPath}`;
+  }
+
+  private buildEmpresaParam(): HttpParams {
+    const empresaId = this.auth.obterEmpresaId();
+    if (!empresaId) {
+      throw new Error('EmpresaId nao encontrado. Realize o login novamente.');
+    }
+    return new HttpParams().set('empresaId', String(empresaId));
   }
 }

@@ -1,0 +1,42 @@
+<div class="pedidos-fechados-container container py-4 usuarios-page">
+  <div class="tabs">
+    <button class="tab active" type="button">Usuários</button>
+  </div>
+
+  <div class="estado" *ngIf="carregando">Carregando...</div>
+  <div class="estado erro" *ngIf="erro">{{ erro }}</div>
+
+  <div class="aba-tipos">
+    <div class="lista-processos usuarios-lista" *ngIf="usuarios.length">
+      <div *ngFor="let u of usuarios" class="linha-processo">
+        <span class="codigo">{{ u.nome }}</span>
+        <span><i class="fa-solid fa-envelope"></i> {{ u.email }}</span>
+        <span><i class="fa-solid fa-id-card"></i> {{ u.perfilNome || ('Perfil ' + u.perfilId) }}</span>
+        <span><i class="fa-solid fa-building"></i> Empresa {{ u.empresaId }}</span>
+        <button class="btn-detalhes" type="button" (click)="abrirEdicao(u)">Editar</button>
+        <button class="btn-acao" type="button" (click)="excluir(u)">Excluir</button>
+      </div>
+    </div>
+
+    <div class="estado-vazio" *ngIf="!usuarios.length && !carregando">
+      Nenhum usuário encontrado.
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalEditarAberto" (click)="fecharModal()">
+  <div class="modal-editar" (click)="$event.stopPropagation()">
+    <h2>Editar usuário</h2>
+    <label>Nome</label>
+    <input [(ngModel)]="usuarioEdicao!.nome" type="text" />
+    <label>Email</label>
+    <input [(ngModel)]="usuarioEdicao!.email" type="email" />
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" (click)="fecharModal()">Cancelar</button>
+      <button class="btn-concluir" (click)="salvar()" [disabled]="carregando">
+        {{ carregando ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+</div>

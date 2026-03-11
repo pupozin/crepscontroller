@@ -4,7 +4,7 @@
   </div>
 
   <a class="logo" routerLink="/">
-    <span class="logo-text">Crep's Fael</span>
+    <span class="logo-text">Nixor Food</span>
   </a>
 
   <div class="search-bar">
@@ -46,6 +46,7 @@
   <div class="btn-create-process">
     <button class="btn" (click)="abrirModalCriar()">Criar Pedido</button>
   </div>
+
 </header>
 
 <nav class="sidebar" [class.open]="menuAberto">
@@ -54,6 +55,9 @@
     <li><a routerLink="/fechados" (click)="closeMenu()">Pedidos fechados</a></li>
     <li><a routerLink="/itens" (click)="closeMenu()">Itens</a></li>
     <li><a routerLink="/dados" (click)="closeMenu()">Dados</a></li>
+    <li><a routerLink="/usuarios" (click)="closeMenu()">Usuarios</a></li>
+    <li><a routerLink="/empresa" (click)="closeMenu()">Empresa</a></li>
+    <li><button class="menu-sair" type="button" (click)="sair()">Sair</button></li>
   </ul>
 </nav>
 

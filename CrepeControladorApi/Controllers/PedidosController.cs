@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using CrepeControladorApi.Data;
 using CrepeControladorApi.Dtos;
@@ -25,32 +24,54 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterPedidos()
+        public async Task<IActionResult> ObterPedidos([FromQuery] int empresaId)
         {
             var pedidos = await _context.Pedidos
-                .FromSqlRaw("SELECT * FROM \"sp_Pedido_Obter\"({0})", (int?)null)
                 .AsNoTracking()
+                .Where(p => p.EmpresaId == empresaId)
                 .ToListAsync();
 
-            return Ok(pedidos);
+            return Ok(pedidos.Select(p => new PedidoResumoDto
+            {
+                Id = p.Id,
+                Codigo = p.Codigo,
+                Cliente = p.Cliente,
+                TipoPedido = p.TipoPedido,
+                Status = p.Status,
+                Observacao = p.Observacao,
+                DataCriacao = p.DataCriacao,
+                DataConclusao = p.DataConclusao,
+                ValorTotal = p.ValorTotal,
+                EmpresaId = p.EmpresaId
+            }));
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> ObterPedido(int id)
+        public async Task<IActionResult> ObterPedido(int id, [FromQuery] int empresaId)
         {
-            var pedidos = await _context.Pedidos
-                .FromSqlRaw("SELECT * FROM \"sp_Pedido_Obter\"({0})", id)
+            var pedido = await _context.Pedidos
                 .AsNoTracking()
-                .ToListAsync();
-
-            var pedido = pedidos.FirstOrDefault();
+                .Include(p => p.Itens)
+                .ThenInclude(i => i.Item)
+                .FirstOrDefaultAsync(p => p.Id == id && p.EmpresaId == empresaId);
 
             if (pedido == null)
             {
                 return NotFound();
             }
 
-            var itens = await ObterItensPedidoPorProcedure(id);
+            var itens = pedido.Itens.Select(i => new PedidoItemDetalheDto
+            {
+                Id = i.Id,
+                PedidoId = i.PedidoId,
+                ItemId = i.ItemId,
+                NomeItem = i.Item.Nome,
+                PrecoItem = i.Item.Preco,
+                ItemAtivo = i.Item.Ativo,
+                Quantidade = i.Quantidade,
+                PrecoUnitario = i.PrecoUnitario,
+                TotalItem = i.TotalItem
+            }).ToList();
 
             return Ok(new
             {
@@ -63,43 +84,44 @@ namespace CrepeControladorApi.Controllers
                 pedido.DataCriacao,
                 pedido.DataConclusao,
                 pedido.ValorTotal,
+                pedido.EmpresaId,
                 Itens = itens
             });
         }
 
         [HttpGet("pesquisar")]
-        public async Task<IActionResult> PesquisarPedidos([FromQuery] string termo)
+        public async Task<IActionResult> PesquisarPedidos([FromQuery] string termo, [FromQuery] int empresaId)
         {
             if (string.IsNullOrWhiteSpace(termo))
             {
                 return BadRequest("Informe um termo para pesquisa.");
             }
 
-            var pedidos = await _pedidoQueryService.PesquisarPedidosAsync(termo.Trim());
+            var pedidos = await _pedidoQueryService.PesquisarPedidosAsync(termo.Trim(), empresaId);
             return Ok(pedidos);
         }
 
         [HttpGet("abertos")]
-        public async Task<IActionResult> ListarPedidosAbertos([FromQuery] string tipoPedido)
+        public async Task<IActionResult> ListarPedidosAbertos([FromQuery] string tipoPedido, [FromQuery] int empresaId)
         {
             if (string.IsNullOrWhiteSpace(tipoPedido))
             {
                 return BadRequest("Informe o tipo de pedido.");
             }
 
-            var pedidos = await _pedidoQueryService.ListarPedidosAbertosPorTipoAsync(tipoPedido);
+            var pedidos = await _pedidoQueryService.ListarPedidosAbertosPorTipoAsync(tipoPedido, empresaId);
             return Ok(pedidos);
         }
 
         [HttpGet("grupo-status")]
-        public async Task<IActionResult> ListarPorGrupoStatus([FromQuery] string grupo)
+        public async Task<IActionResult> ListarPorGrupoStatus([FromQuery] string grupo, [FromQuery] int empresaId)
         {
             if (string.IsNullOrWhiteSpace(grupo))
             {
                 return BadRequest("Informe o grupo de status.");
             }
 
-            var pedidos = await _pedidoQueryService.ListarPorGrupoStatusAsync(grupo.ToUpperInvariant());
+            var pedidos = await _pedidoQueryService.ListarPorGrupoStatusAsync(grupo.ToUpperInvariant(), empresaId);
             return Ok(pedidos);
         }
 
@@ -125,14 +147,15 @@ namespace CrepeControladorApi.Controllers
                 Cliente = pedidoDto.Cliente,
                 TipoPedido = pedidoDto.TipoPedido,
                 Observacao = pedidoDto.Observacao,
-                DataCriacao = DateTime.UtcNow
+                DataCriacao = DateTime.UtcNow,
+                EmpresaId = pedidoDto.EmpresaId
             };
 
             decimal valorTotal = 0m;
 
             foreach (var itemDto in pedidoDto.Itens)
             {
-                var item = await _context.Itens.FindAsync(itemDto.ItemId);
+                var item = await _context.Itens.FirstOrDefaultAsync(i => i.Id == itemDto.ItemId && i.EmpresaId == pedidoDto.EmpresaId);
                 if (item == null)
                 {
                     ModelState.AddModelError(nameof(pedidoDto.Itens), $"Item com Id {itemDto.ItemId} nao foi encontrado.");
@@ -162,6 +185,7 @@ namespace CrepeControladorApi.Controllers
                 pedido.Id,
                 pedido.Codigo,
                 pedido.Status,
+                pedido.EmpresaId,
                 pedido.ValorTotal,
                 Itens = pedido.Itens.Select(i => new
                 {
@@ -182,7 +206,7 @@ namespace CrepeControladorApi.Controllers
 
             var pedido = await _context.Pedidos
                 .Include(p => p.Itens)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id && p.EmpresaId == pedidoDto.EmpresaId);
 
             if (pedido == null)
             {
@@ -212,7 +236,7 @@ namespace CrepeControladorApi.Controllers
 
             foreach (var itemDto in pedidoDto.Itens)
             {
-                var item = await _context.Itens.FindAsync(itemDto.ItemId);
+                var item = await _context.Itens.FirstOrDefaultAsync(i => i.Id == itemDto.ItemId && i.EmpresaId == pedido.EmpresaId);
                 if (item == null)
                 {
                     ModelState.AddModelError(nameof(pedidoDto.Itens), $"Item com Id {itemDto.ItemId} nao foi encontrado.");
@@ -254,6 +278,7 @@ namespace CrepeControladorApi.Controllers
                 pedido.Id,
                 pedido.Codigo,
                 pedido.Status,
+                pedido.EmpresaId,
                 pedido.ValorTotal,
                 Itens = pedido.Itens.Select(i => new
                 {
@@ -287,64 +312,10 @@ namespace CrepeControladorApi.Controllers
             return $"Pedido #{proximoNumero:D4}";
         }
 
-        private async Task<List<PedidoItemDetalheDto>> ObterItensPedidoPorProcedure(int pedidoId)
-        {
-            var itens = new List<PedidoItemDetalheDto>();
-            var connection = _context.Database.GetDbConnection();
-            var fecharConexao = connection.State != ConnectionState.Open;
-
-            if (fecharConexao)
-            {
-                await connection.OpenAsync();
-                await connection.EnsureApplicationTimeZoneAsync();
-            }
-
-            try
-            {
-                await using var command = connection.CreateCommand();
-                command.CommandText = "SELECT * FROM \"sp_ItensPedido_ObterPorPedido\"(@PedidoId)";
-                command.CommandType = CommandType.Text;
-
-                var parametro = command.CreateParameter();
-                parametro.ParameterName = "@PedidoId";
-                parametro.Value = pedidoId;
-                command.Parameters.Add(parametro);
-
-                await using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    itens.Add(new PedidoItemDetalheDto
-                    {
-                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                        PedidoId = reader.GetInt32(reader.GetOrdinal("PedidoId")),
-                        ItemId = reader.GetInt32(reader.GetOrdinal("ItemId")),
-                        NomeItem = reader.GetString(reader.GetOrdinal("NomeItem")),
-                        PrecoItem = reader.GetDecimal(reader.GetOrdinal("PrecoItem")),
-                        ItemAtivo = reader.GetBoolean(reader.GetOrdinal("ItemAtivo")),
-                        Quantidade = reader.GetInt32(reader.GetOrdinal("Quantidade")),
-                        PrecoUnitario = reader.GetDecimal(reader.GetOrdinal("PrecoUnitario")),
-                        TotalItem = reader.GetDecimal(reader.GetOrdinal("TotalItem"))
-                    });
-                }
-            }
-            finally
-            {
-                if (fecharConexao)
-                {
-                    await connection.CloseAsync();
-                }
-            }
-
-            return itens;
-        }
-
         [HttpGet("buscar")]
-        public async Task<IActionResult> BuscarPedidos([FromQuery] string termo)
+        public async Task<IActionResult> BuscarPedidos([FromQuery] string termo, [FromQuery] int empresaId)
         {
-            var pedidos = await _context.Pedidos
-                .FromSqlRaw("SELECT * FROM \"sp_PesquisarPedidos\"({0})", termo)
-                .ToListAsync();
-
+            var pedidos = await _pedidoQueryService.PesquisarPedidosAsync(termo, empresaId);
             return Ok(pedidos);
         }
     }

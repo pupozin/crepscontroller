@@ -1,24 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\GabrielPupo\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj": {}
+    "C:\\Users\\Gabriel\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\GabrielPupo\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj": {
+    "C:\\Users\\Gabriel\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\GabrielPupo\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj",
+        "projectUniqueName": "C:\\Users\\Gabriel\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj",
         "projectName": "CrepeControladorApi",
-        "projectPath": "C:\\Users\\GabrielPupo\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj",
-        "packagesPath": "C:\\Users\\GabrielPupo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\GabrielPupo\\Desktop\\crepscontroller\\CrepeControladorApi\\obj\\",
+        "projectPath": "C:\\Users\\Gabriel\\Desktop\\crepscontroller\\CrepeControladorApi\\CrepeControladorApi.csproj",
+        "packagesPath": "C:\\Users\\Gabriel\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Gabriel\\Desktop\\crepscontroller\\CrepeControladorApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\GabrielPupo\\Desktop\\crepscontroller\\NuGet.Config",
-          "C:\\Users\\GabrielPupo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Gabriel\\Desktop\\crepscontroller\\NuGet.Config",
+          "C:\\Users\\Gabriel\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -103,7 +103,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     }

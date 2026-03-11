@@ -1,0 +1,58 @@
+@use '../pedidos-fechados/pedidos-fechados';
+
+.empresa-page {
+  background-color: var(--cor-primaria);
+}
+
+.estado {
+  margin: 10px 0;
+}
+
+.estado.erro {
+  color: #f87171;
+}
+
+.card-empresa {
+  margin-top: 4px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-empresa input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cor-branca);
+}
+
+.card-empresa input:disabled {
+  opacity: 0.6;
+}
+
+.acoes {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-concluir {
+  background: var(--cor-secundaria);
+  color: #2d2012;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}

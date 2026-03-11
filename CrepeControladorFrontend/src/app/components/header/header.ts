@@ -15,6 +15,7 @@ import {
   PedidoResumo,
   PedidoService
 } from '../../services/pedido.service';
+import { AuthService, UsuarioAutenticado } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -55,6 +56,7 @@ export class Header implements OnInit, OnDestroy {
   constructor(
     private readonly pedidoService: PedidoService,
     private readonly router: Router,
+    private readonly auth: AuthService,
     @Inject(DOCUMENT) private readonly document: Document
   ) {}
 
@@ -248,5 +250,13 @@ export class Header implements OnInit, OnDestroy {
 
   private isMobileViewport(): boolean {
     return typeof window !== 'undefined' && window.innerWidth <= 1050;
+  }
+
+  get usuario(): UsuarioAutenticado | null {
+    return this.auth.obterUsuarioAtual();
+  }
+
+  sair(): void {
+    this.auth.logout();
   }
 }

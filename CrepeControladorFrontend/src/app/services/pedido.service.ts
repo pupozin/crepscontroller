@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface PedidoResumo {
   id: number;
@@ -13,6 +14,7 @@ export interface PedidoResumo {
   dataCriacao?: string;
   dataConclusao?: string | null;
   valorTotal: number;
+  empresaId: number;
 }
 
 export interface PedidoItemDetalhe {
@@ -44,12 +46,14 @@ export interface PedidoItemCreatePayload {
 export interface ItemCreatePayload {
   nome: string;
   preco: number;
+  empresaId?: number;
 }
 
 export interface ItemUpdatePayload {
   nome?: string;
   preco?: number;
   ativo?: boolean;
+  empresaId?: number;
 }
 
 export interface PedidoCreatePayload {
@@ -57,6 +61,7 @@ export interface PedidoCreatePayload {
   tipoPedido: string;
   observacao?: string;
   itens: PedidoItemCreatePayload[];
+  empresaId?: number;
 }
 
 export interface PedidoUpdatePayload {
@@ -65,6 +70,7 @@ export interface PedidoUpdatePayload {
   status: string;
   observacao?: string;
   itens: PedidoItemCreatePayload[];
+  empresaId?: number;
 }
 
 @Injectable({
@@ -76,48 +82,67 @@ export class PedidoService {
 
   readonly atualizacoes$ = this.atualizacao$.asObservable();
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly auth: AuthService
+  ) {}
 
   buscarPedidos(termo: string): Observable<PedidoResumo[]> {
     return this.http.get<PedidoResumo[]>(this.buildUrl('pedidos/pesquisar'), {
-      params: { termo }
+      params: this.buildParams({ termo })
     });
   }
 
   listarPorGrupoStatus(grupo: 'ABERTOS' | 'FECHADOS'): Observable<PedidoResumo[]> {
     return this.http.get<PedidoResumo[]>(this.buildUrl('pedidos/grupo-status'), {
-      params: { grupo }
+      params: this.buildParams({ grupo })
     });
   }
 
   listarPedidosAbertosPorTipo(tipoPedido: string): Observable<PedidoResumo[]> {
     return this.http.get<PedidoResumo[]>(this.buildUrl('pedidos/abertos'), {
-      params: { tipoPedido }
+      params: this.buildParams({ tipoPedido })
     });
   }
 
   obterPedido(id: number): Observable<PedidoDetalhe> {
-    return this.http.get<PedidoDetalhe>(this.buildUrl(`pedidos/${id}`));
+    return this.http.get<PedidoDetalhe>(this.buildUrl(`pedidos/${id}`), {
+      params: this.buildParams()
+    });
   }
 
   criarPedido(payload: PedidoCreatePayload): Observable<PedidoResumo> {
-    return this.http.post<PedidoResumo>(this.buildUrl('pedidos'), payload);
+    return this.http.post<PedidoResumo>(this.buildUrl('pedidos'), {
+      ...payload,
+      empresaId: this.obterEmpresaId()
+    });
   }
 
   atualizarPedido(id: number, payload: PedidoUpdatePayload): Observable<PedidoResumo> {
-    return this.http.put<PedidoResumo>(this.buildUrl(`pedidos/${id}`), payload);
+    return this.http.put<PedidoResumo>(this.buildUrl(`pedidos/${id}`), {
+      ...payload,
+      empresaId: this.obterEmpresaId()
+    });
   }
 
   listarItens(): Observable<PedidoItemSelecionavel[]> {
-    return this.http.get<PedidoItemSelecionavel[]>(this.buildUrl('itens'));
+    return this.http.get<PedidoItemSelecionavel[]>(this.buildUrl('itens'), {
+      params: this.buildParams()
+    });
   }
 
   criarItem(payload: ItemCreatePayload): Observable<PedidoItemSelecionavel> {
-    return this.http.post<PedidoItemSelecionavel>(this.buildUrl('itens'), payload);
+    return this.http.post<PedidoItemSelecionavel>(this.buildUrl('itens'), {
+      ...payload,
+      empresaId: this.obterEmpresaId()
+    });
   }
 
   atualizarItem(id: number, payload: ItemUpdatePayload): Observable<PedidoItemSelecionavel> {
-    return this.http.put<PedidoItemSelecionavel>(this.buildUrl(`itens/${id}`), payload);
+    return this.http.put<PedidoItemSelecionavel>(this.buildUrl(`itens/${id}`), {
+      ...payload,
+      empresaId: this.obterEmpresaId()
+    });
   }
 
   notificarAtualizacao(): void {
@@ -145,5 +170,30 @@ export class PedidoService {
 
     const normalizedBase = baseWithSlash.startsWith('/') ? baseWithSlash : `/${baseWithSlash}`;
     return `${normalizedBase}${trimmedPath}`;
+  }
+
+  private buildParams(extra?: Record<string, string | number | undefined>): HttpParams {
+    const empresaId = this.obterEmpresaId();
+    const valores: Record<string, string> = { empresaId: String(empresaId) };
+    if (extra) {
+      Object.entries(extra).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          valores[key] = String(value);
+        }
+      });
+    }
+    let params = new HttpParams();
+    Object.entries(valores).forEach(([k, v]) => {
+      params = params.set(k, v);
+    });
+    return params;
+  }
+
+  private obterEmpresaId(): number {
+    const empresaId = this.auth.obterEmpresaId();
+    if (!empresaId) {
+      throw new Error('EmpresaId nao encontrado. Realize o login novamente.');
+    }
+    return empresaId;
   }
 }

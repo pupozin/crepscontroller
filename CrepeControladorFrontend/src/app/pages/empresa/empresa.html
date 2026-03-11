@@ -1,0 +1,36 @@
+<div class="pedidos-fechados-container container py-4 empresa-page">
+  <div class="tabs">
+    <button class="tab active" type="button">Empresa</button>
+  </div>
+
+  <div class="estado" *ngIf="carregando">Carregando...</div>
+  <div class="estado erro" *ngIf="erro">{{ erro }}</div>
+
+  <div class="card-empresa" *ngIf="empresa">
+    <div class="campo">
+      <label>CNPJ</label>
+      <input [(ngModel)]="empresa.cnpj" />
+    </div>
+
+    <div class="campo">
+      <label>Nome</label>
+      <input [(ngModel)]="empresa.nome" />
+    </div>
+
+    <div class="campo">
+      <label>Razão Social</label>
+      <input [(ngModel)]="empresa.razaoSocial" />
+    </div>
+
+    <div class="campo">
+      <label>Seguimento</label>
+      <input [value]="empresa.seguimento" disabled />
+    </div>
+
+    <div class="acoes">
+      <button class="btn-concluir" (click)="salvar()" [disabled]="carregando">
+        {{ carregando ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+</div>

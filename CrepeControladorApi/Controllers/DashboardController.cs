@@ -17,81 +17,81 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet("horarios/periodo")]
-        public async Task<IActionResult> ObterHorariosPicoPeriodo([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        public async Task<IActionResult> ObterHorariosPicoPeriodo([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim, [FromQuery] int empresaId)
         {
             if (dataInicio > dataFim)
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterHorariosPicoPorPeriodo(dataInicio, dataFim);
+            var resultado = await _dashboardService.ObterHorariosPicoPorPeriodo(dataInicio, dataFim, empresaId);
             return Ok(resultado);
         }
 
         [HttpGet("dia-semana/picos")]
-        public async Task<IActionResult> ObterPicosPorDiaSemana([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        public async Task<IActionResult> ObterPicosPorDiaSemana([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim, [FromQuery] int empresaId)
         {
             if (dataInicio > dataFim)
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterHorariosPicoDiaSemanaResumo(dataInicio, dataFim);
+            var resultado = await _dashboardService.ObterHorariosPicoDiaSemanaResumo(dataInicio, dataFim, empresaId);
             return Ok(resultado);
         }
 
         [HttpGet("dia-semana/distribuicao")]
-        public async Task<IActionResult> ObterDistribuicaoDiaSemana([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        public async Task<IActionResult> ObterDistribuicaoDiaSemana([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim, [FromQuery] int empresaId)
         {
             if (dataInicio > dataFim)
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterDistribuicaoDiaSemanaPorHora(dataInicio, dataFim);
+            var resultado = await _dashboardService.ObterDistribuicaoDiaSemanaPorHora(dataInicio, dataFim, empresaId);
             return Ok(resultado);
         }
 
         [HttpGet("periodo-total")]
-        public async Task<IActionResult> ObterPeriodoTotal()
+        public async Task<IActionResult> ObterPeriodoTotal([FromQuery] int empresaId)
         {
-            var periodo = await _dashboardService.ObterPeriodoTotal();
+            var periodo = await _dashboardService.ObterPeriodoTotal(empresaId);
             return Ok(periodo ?? new DashboardPeriodoTotalDto());
         }
 
         [HttpGet("resumo")]
-        public async Task<IActionResult> ObterResumoPeriodo([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
+        public async Task<IActionResult> ObterResumoPeriodo([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim, [FromQuery] int empresaId)
         {
             if (DatasInvalidas(dataInicio, dataFim))
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterResumoPeriodo(dataInicio, dataFim);
+            var resultado = await _dashboardService.ObterResumoPeriodo(dataInicio, dataFim, empresaId);
             return Ok(resultado);
         }
 
         [HttpGet("itens-ranking")]
-        public async Task<IActionResult> ObterItensRanking([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
+        public async Task<IActionResult> ObterItensRanking([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim, [FromQuery] int empresaId)
         {
             if (DatasInvalidas(dataInicio, dataFim))
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterItensRanking(dataInicio, dataFim);
+            var resultado = await _dashboardService.ObterItensRanking(dataInicio, dataFim, empresaId);
             return Ok(resultado);
         }
 
         [HttpGet("tipo-pedido")]
-        public async Task<IActionResult> ObterTipoPedido([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
+        public async Task<IActionResult> ObterTipoPedido([FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim, [FromQuery] int empresaId)
         {
             if (DatasInvalidas(dataInicio, dataFim))
             {
                 return BadRequest("DataInicio nao pode ser maior que DataFim.");
             }
 
-            var resultado = await _dashboardService.ObterTipoPedido(dataInicio, dataFim);
+            var resultado = await _dashboardService.ObterTipoPedido(dataInicio, dataFim, empresaId);
             return Ok(resultado);
         }
 

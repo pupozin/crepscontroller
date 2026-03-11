@@ -16,5 +16,8 @@ namespace CrepeControladorApi.Dtos
 
         [MinLength(1, ErrorMessage = "O pedido precisa de ao menos um item.")]
         public List<PedidoItemCreateDto> Itens { get; set; } = new();
+
+        [Required]
+        public int EmpresaId { get; set; }
     }
 }
