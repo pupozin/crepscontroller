@@ -91,8 +91,32 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.link-primeiro {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: 6px 0;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .erro {
   color: #f87171;
   font-size: 13px;
   margin-top: 4px;
+}
+
+.primeiro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.link-voltar {
+  margin-top: 4px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 10px;
+  border-radius: 10px;
 }

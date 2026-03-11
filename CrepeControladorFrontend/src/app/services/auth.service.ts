@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
@@ -17,6 +18,11 @@ export interface UsuarioAutenticado {
 interface LoginRequest {
   email: string;
   senha: string;
+}
+
+interface PrimeiroAcessoResposta {
+  podeDefinir?: boolean;
+  PodeDefinir?: boolean;
 }
 
 @Injectable({
@@ -37,6 +43,18 @@ export class AuthService {
     const payload: LoginRequest = { email, senha };
     return this.http
       .post<UsuarioAutenticado>(this.buildUrl('auth/login'), payload)
+      .pipe(tap((usuario) => this.salvar(usuario)));
+  }
+
+  verificarPrimeiroAcesso(email: string): Observable<boolean> {
+    return this.http
+      .post<PrimeiroAcessoResposta>(this.buildUrl('auth/primeiro-acesso/verificar'), { email })
+      .pipe(map((resp) => !!(resp?.podeDefinir ?? resp?.PodeDefinir)));
+  }
+
+  definirPrimeiroAcesso(email: string, senha: string): Observable<UsuarioAutenticado> {
+    return this.http
+      .post<UsuarioAutenticado>(this.buildUrl('auth/primeiro-acesso/definir'), { email, senha })
       .pipe(tap((usuario) => this.salvar(usuario)));
   }
 

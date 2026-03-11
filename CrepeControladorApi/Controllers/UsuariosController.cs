@@ -86,7 +86,7 @@ namespace CrepeControladorApi.Controllers
                 Nome = dto.Nome,
                 PerfilId = dto.PerfilId,
                 EmpresaId = dto.EmpresaId,
-                Senha = "123456"
+                Senha = null
             };
 
             _context.Usuarios.Add(usuario);

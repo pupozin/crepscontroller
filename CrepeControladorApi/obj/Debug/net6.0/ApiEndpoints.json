@@ -16,6 +16,38 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "CrepeControladorApi.Controllers.AuthController",
+    "Method": "DefinirPrimeiroAcesso",
+    "RelativePath": "api/Auth/primeiro-acesso/definir",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "CrepeControladorApi.Dtos.PrimeiroAcessoDefinirDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.AuthController",
+    "Method": "VerificarPrimeiroAcesso",
+    "RelativePath": "api/Auth/primeiro-acesso/verificar",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "CrepeControladorApi.Dtos.PrimeiroAcessoEmailDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "CrepeControladorApi.Controllers.DashboardController",
     "Method": "ObterDistribuicaoDiaSemana",
     "RelativePath": "api/Dashboard/dia-semana/distribuicao",

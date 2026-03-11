@@ -1,33 +1,92 @@
 <div class="login-container">
   <div class="login-card">
-    <h1>Entrar</h1>
+    <h1>{{ primeiroAcessoAberto ? 'Primeiro acesso' : 'Entrar' }}</h1>
 
-    <form (ngSubmit)="entrar()" #loginForm="ngForm">
-      <label for="email">E-mail</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        [(ngModel)]="email"
-        required
-        autocomplete="email"
-      />
+    <ng-container *ngIf="!primeiroAcessoAberto; else primeiroAcessoTpl">
+      <form (ngSubmit)="entrar()" #loginForm="ngForm">
+        <label for="email">E-mail</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          [(ngModel)]="email"
+          required
+          autocomplete="email"
+        />
 
-      <label for="senha">Senha</label>
-      <input
-        id="senha"
-        name="senha"
-        type="password"
-        [(ngModel)]="senha"
-        required
-        autocomplete="current-password"
-      />
+        <label for="senha">Senha</label>
+        <input
+          id="senha"
+          name="senha"
+          type="password"
+          [(ngModel)]="senha"
+          required
+          autocomplete="current-password"
+        />
 
-      <button type="submit" [disabled]="carregando || !loginForm.form.valid">
-        {{ carregando ? 'Entrando...' : 'Entrar' }}
+        <button type="submit" [disabled]="carregando || !loginForm.form.valid">
+          {{ carregando ? 'Entrando...' : 'Entrar' }}
+        </button>
+
+        <button class="link-primeiro" type="button" (click)="abrirPrimeiroAcesso()">
+          Primeiro acesso?
+        </button>
+
+        <div class="erro" *ngIf="erro">{{ erro }}</div>
+      </form>
+    </ng-container>
+
+    <ng-template #primeiroAcessoTpl>
+      <p class="subtitle" *ngIf="primeiroEtapa === 'email'">
+        Informe o e-mail e clique em próximo para definir a senha.
+      </p>
+      <p class="subtitle" *ngIf="primeiroEtapa === 'senha'">
+        Defina a nova senha para continuar.
+      </p>
+
+      <div *ngIf="primeiroEtapa === 'email'" class="primeiro-form">
+        <label for="primeiro-email">E-mail</label>
+        <input
+          id="primeiro-email"
+          type="email"
+          [(ngModel)]="emailPrimeiro"
+          autocomplete="email"
+          required
+        />
+        <button type="button" (click)="confirmarEmailPrimeiro()" [disabled]="carregandoPrimeiro || !emailPrimeiro">
+          {{ carregandoPrimeiro ? 'Verificando...' : 'Próximo' }}
+        </button>
+      </div>
+
+      <div *ngIf="primeiroEtapa === 'senha'" class="primeiro-form">
+        <label for="primeiro-senha">Senha</label>
+        <input
+          id="primeiro-senha"
+          type="password"
+          [(ngModel)]="senhaPrimeiro"
+          autocomplete="new-password"
+          required
+        />
+
+        <label for="primeiro-senha-confirma">Confirmar senha</label>
+        <input
+          id="primeiro-senha-confirma"
+          type="password"
+          [(ngModel)]="senhaPrimeiroConfirma"
+          autocomplete="new-password"
+          required
+        />
+
+        <button type="button" (click)="definirSenhaPrimeiro()" [disabled]="carregandoPrimeiro">
+          {{ carregandoPrimeiro ? 'Salvando...' : 'Salvar senha' }}
+        </button>
+      </div>
+
+      <div class="erro" *ngIf="erroPrimeiro">{{ erroPrimeiro }}</div>
+
+      <button class="link-voltar" type="button" (click)="fecharPrimeiroAcesso()" [disabled]="carregandoPrimeiro">
+        Voltar para login
       </button>
-
-      <div class="erro" *ngIf="erro">{{ erro }}</div>
-    </form>
+    </ng-template>
   </div>
 </div>

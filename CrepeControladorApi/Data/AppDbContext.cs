@@ -96,8 +96,7 @@ namespace CrepeControladorApi.Data
 
             modelBuilder.Entity<Usuario>()
                 .Property(u => u.Senha)
-                .HasMaxLength(200)
-                .IsRequired();
+                .HasMaxLength(200);
 
             modelBuilder.Entity<Usuario>()
                 .HasOne(u => u.Empresa)

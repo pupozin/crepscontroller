@@ -17,6 +17,14 @@ export class LoginPage {
   carregando = false;
   erro = '';
 
+  primeiroAcessoAberto = false;
+  primeiroEtapa: 'email' | 'senha' = 'email';
+  emailPrimeiro = '';
+  senhaPrimeiro = '';
+  senhaPrimeiroConfirma = '';
+  erroPrimeiro = '';
+  carregandoPrimeiro = false;
+
   constructor(private readonly auth: AuthService, private readonly router: Router) {}
 
   async entrar(): Promise<void> {
@@ -33,8 +41,69 @@ export class LoginPage {
       },
       error: (err) => {
         console.error('Falha no login', err);
-        this.erro = 'Credenciais inválidas. Tente novamente.';
+        this.erro = 'Credenciais inv\u00e1lidas. Tente novamente.';
         this.carregando = false;
+      }
+    });
+  }
+
+  abrirPrimeiroAcesso(): void {
+    this.primeiroAcessoAberto = true;
+    this.primeiroEtapa = 'email';
+    this.emailPrimeiro = '';
+    this.senhaPrimeiro = '';
+    this.senhaPrimeiroConfirma = '';
+    this.erroPrimeiro = '';
+  }
+
+  fecharPrimeiroAcesso(): void {
+    this.primeiroAcessoAberto = false;
+    this.carregandoPrimeiro = false;
+    this.erroPrimeiro = '';
+  }
+
+  confirmarEmailPrimeiro(): void {
+    if (this.carregandoPrimeiro || !this.emailPrimeiro) return;
+    this.erroPrimeiro = '';
+    this.carregandoPrimeiro = true;
+    this.auth.verificarPrimeiroAcesso(this.emailPrimeiro.trim()).subscribe({
+      next: () => {
+        this.carregandoPrimeiro = false;
+        this.primeiroEtapa = 'senha';
+      },
+      error: (err) => {
+        console.error(err);
+        this.erroPrimeiro = 'Usu\u00e1rio inexistente ou j\u00e1 possui senha.';
+        this.carregandoPrimeiro = false;
+      }
+    });
+  }
+
+  definirSenhaPrimeiro(): void {
+    if (this.carregandoPrimeiro) return;
+    this.erroPrimeiro = '';
+    if (!this.senhaPrimeiro || this.senhaPrimeiro.length < 4) {
+      this.erroPrimeiro = 'Informe uma senha com pelo menos 4 caracteres.';
+      return;
+    }
+    if (this.senhaPrimeiro !== this.senhaPrimeiroConfirma) {
+      this.erroPrimeiro = 'As senhas n\u00e3o conferem.';
+      return;
+    }
+
+    this.carregandoPrimeiro = true;
+    this.auth.definirPrimeiroAcesso(this.emailPrimeiro.trim(), this.senhaPrimeiro).subscribe({
+      next: () => {
+        this.carregandoPrimeiro = false;
+        this.primeiroAcessoAberto = false;
+        this.email = this.emailPrimeiro.trim();
+        this.senha = this.senhaPrimeiro;
+        this.entrar();
+      },
+      error: (err) => {
+        console.error(err);
+        this.erroPrimeiro = 'N\u00e3o foi poss\u00edvel definir a senha. Tente novamente.';
+        this.carregandoPrimeiro = false;
       }
     });
   }
