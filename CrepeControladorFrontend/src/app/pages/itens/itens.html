@@ -130,4 +130,20 @@
       </div>
     </div>
   </div>
+
+  <div class="modal-overlay-detalhe" *ngIf="confirmacao.visivel" (click)="cancelarConfirmacao()">
+    <div class="modal-detalhes" (click)="$event.stopPropagation()">
+      <button class="btn-fechar" type="button" (click)="cancelarConfirmacao()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+
+      <h2>Confirmar</h2>
+      <p>{{ confirmacao.mensagem }}</p>
+
+      <div class="modal-actions">
+        <button class="btn-cancelar" type="button" (click)="cancelarConfirmacao()">Nao</button>
+        <button class="btn-concluir" type="button" (click)="confirmarAcao()">Sim</button>
+      </div>
+    </div>
+  </div>
 </div>

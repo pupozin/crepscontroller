@@ -24,7 +24,7 @@ export class MesaService {
 
   listarLivres(mesaIdAtual?: number | null): Observable<Mesa[]> {
     const extras: Record<string, string | number | undefined> = { apenasLivres: 'true' };
-    if (mesaIdAtual) {
+    if (mesaIdAtual !== undefined && mesaIdAtual !== null) {
       extras['incluirMesaId'] = mesaIdAtual;
     }
     return this.http.get<Mesa[]>(this.buildUrl('mesas'), {

@@ -15,6 +15,7 @@ export class MesasPage implements OnInit {
   carregando = false;
   salvandoMesa = false;
   mensagemMesa = '';
+  confirmacao = { visivel: false, mensagem: '', acao: () => {} };
 
   modalMesaAberto = false;
   mesaEmEdicao: Mesa | null = null;
@@ -88,15 +89,32 @@ export class MesasPage implements OnInit {
   }
 
   excluirMesa(mesa: Mesa): void {
-    if (!confirm(`Remover ${mesa.numero}?`)) {
-      return;
-    }
-    this.mesaService.excluir(mesa.id).subscribe({
-      next: () => this.listar(),
-      error: (err) => {
-        console.error('Erro ao excluir mesa', err);
-        this.mensagemMesa = 'Nao foi possivel excluir a mesa.';
-      }
+    this.abrirConfirmacao(`Remover ${mesa.numero}?`, () => {
+      this.mesaService.excluir(mesa.id).subscribe({
+        next: () => {
+          this.cancelarConfirmacao();
+          this.listar();
+        },
+        error: (err) => {
+          console.error('Erro ao excluir mesa', err);
+          this.mensagemMesa = 'Nao foi possivel excluir a mesa.';
+          this.cancelarConfirmacao();
+        }
+      });
     });
+  }
+
+  abrirConfirmacao(mensagem: string, acao: () => void): void {
+    this.confirmacao = { visivel: true, mensagem, acao };
+  }
+
+  confirmarAcao(): void {
+    if (this.confirmacao.visivel) {
+      this.confirmacao.acao();
+    }
+  }
+
+  cancelarConfirmacao(): void {
+    this.confirmacao = { visivel: false, mensagem: '', acao: () => {} };
   }
 }

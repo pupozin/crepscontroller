@@ -187,12 +187,13 @@
 
           <div *ngIf="pedidoFormulario.tipoPedido === 'Restaurante'">
             <label>Mesa</label>
-            <select
+              <select
               [(ngModel)]="pedidoFormulario.mesaId"
               [ngModelOptions]="{ standalone: true }"
+              (change)="carregarMesas(pedidoFormulario.mesaId)"
             >
               <option [ngValue]="null" disabled>Selecione a mesa</option>
-              <option *ngFor="let mesa of mesas" [ngValue]="mesa.id">
+              <option *ngFor="let mesa of mesasExibicao" [ngValue]="mesa.id">
                 {{ mesa.numero }}
               </option>
             </select>
@@ -264,6 +265,20 @@
           </button>
         </div>
       </ng-container>
+    </div>
+  </div>
+
+  <div class="modal-overlay-detalhe" *ngIf="confirmacao.visivel" (click)="cancelarConfirmacao()">
+    <div class="modal-detalhes" (click)="$event.stopPropagation()">
+      <button class="btn-fechar" type="button" (click)="cancelarConfirmacao()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+      <h3>Confirmar</h3>
+      <p>{{ confirmacao.mensagem }}</p>
+      <div class="modal-actions">
+        <button class="btn-cancelar" type="button" (click)="cancelarConfirmacao()">Não</button>
+        <button class="btn-concluir" type="button" (click)="confirmarAcao()">Sim</button>
+      </div>
     </div>
   </div>
 </div>

@@ -50,6 +50,7 @@ export class PedidosAbertos implements OnInit, OnDestroy {
   mesasCarregando = false;
   itensDisponiveis: PedidoItemSelecionavel[] = [];
   mesas: Mesa[] = [];
+  mesasExibicao: Mesa[] = [];
 
   carregando = false;
   salvandoPedido = false;
@@ -58,6 +59,11 @@ export class PedidosAbertos implements OnInit, OnDestroy {
   pedidoSelecionado: PedidoDetalhe | null = null;
   carregandoDetalhes = false;
   mensagemFormulario = '';
+  confirmacao = {
+    visivel: false,
+    mensagem: '',
+    acao: () => {}
+  };
 
   pedidoFormulario: PedidoFormulario = this.criarFormularioVazio();
 
@@ -301,48 +307,61 @@ export class PedidosAbertos implements OnInit, OnDestroy {
     if (!this.pedidoSelecionado) {
       return;
     }
-    const payload = this.montarPayloadAtualizacao(status);
-    if (!payload) {
-      return;
-    }
-    this.salvandoPedido = true;
-    this.pedidoService.atualizarPedido(this.pedidoSelecionado.id, payload).subscribe({
-      next: () => {
-        this.salvandoPedido = false;
-        this.modalDetalhesAberto = false;
-        this.pedidoService.notificarAtualizacao();
-      },
-      error: (err) => {
-        console.error('Erro ao atualizar status do pedido', err);
-        this.salvandoPedido = false;
-        this.mensagemFormulario = 'Nao foi possivel atualizar o status. Veja o console.';
+    this.abrirConfirmacao(
+      `Confirmar ${status.toLowerCase()} do pedido?`,
+      () => {
+        const payload = this.montarPayloadAtualizacao(status);
+        if (!payload) {
+          this.cancelarConfirmacao();
+          return;
+        }
+        this.salvandoPedido = true;
+        this.pedidoService.atualizarPedido(this.pedidoSelecionado!.id, payload).subscribe({
+          next: () => {
+            this.salvandoPedido = false;
+            this.modalDetalhesAberto = false;
+            this.pedidoService.notificarAtualizacao();
+            this.cancelarConfirmacao();
+          },
+          error: (err) => {
+            console.error('Erro ao atualizar status do pedido', err);
+            this.salvandoPedido = false;
+            this.mensagemFormulario = 'Nao foi possivel atualizar o status. Veja o console.';
+            this.cancelarConfirmacao();
+          }
+        });
       }
-    });
+    );
   }
 
   finalizarPedidoDireto(pedido: PedidoResumo): void {
     if (!pedido?.id || this.acaoRapidaEmExecucao) {
       return;
     }
-    this.acaoRapidaEmExecucao = true;
-    this.pedidoService.obterPedido(pedido.id).subscribe({
-      next: (detalhe) => {
-        const payload = this.criarPayloadDeDetalhe(detalhe, 'Finalizado');
-        this.pedidoService.atualizarPedido(detalhe.id, payload).subscribe({
-          next: () => {
-            this.acaoRapidaEmExecucao = false;
-            this.pedidoService.notificarAtualizacao();
-          },
-          error: (erroAtualizacao) => {
-            console.error('Erro ao finalizar pedido', erroAtualizacao);
-            this.acaoRapidaEmExecucao = false;
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Erro ao carregar pedido para finalizar', err);
-        this.acaoRapidaEmExecucao = false;
-      }
+    this.abrirConfirmacao('Finalizar pedido?', () => {
+      this.acaoRapidaEmExecucao = true;
+      this.pedidoService.obterPedido(pedido.id).subscribe({
+        next: (detalhe) => {
+          const payload = this.criarPayloadDeDetalhe(detalhe, 'Finalizado');
+          this.pedidoService.atualizarPedido(detalhe.id, payload).subscribe({
+            next: () => {
+              this.acaoRapidaEmExecucao = false;
+              this.pedidoService.notificarAtualizacao();
+              this.cancelarConfirmacao();
+            },
+            error: (erroAtualizacao) => {
+              console.error('Erro ao finalizar pedido', erroAtualizacao);
+              this.acaoRapidaEmExecucao = false;
+              this.cancelarConfirmacao();
+            }
+          });
+        },
+        error: (err) => {
+          console.error('Erro ao carregar pedido para finalizar', err);
+          this.acaoRapidaEmExecucao = false;
+          this.cancelarConfirmacao();
+        }
+      });
     });
   }
 
@@ -398,18 +417,52 @@ export class PedidosAbertos implements OnInit, OnDestroy {
     this.carregarMesas(this.pedidoSelecionado?.mesaId ?? undefined);
   }
 
-  private carregarMesas(mesaAtual?: number): void {
-    this.mesaService.listarLivres(mesaAtual).subscribe({
-      next: (mesas) => (this.mesas = mesas),
+  carregarMesas(mesaAtual?: number | null): void {
+    const mesaId =
+      mesaAtual ??
+      this.pedidoFormulario.mesaId ??
+      this.pedidoSelecionado?.mesaId ??
+      undefined;
+    this.mesaService.listarLivres(mesaId).subscribe({
+      next: (mesas) => {
+        this.mesas = mesas;
+        this.mesasExibicao = [...mesas];
+        if (mesaId && !mesas.some((m) => m.id === mesaId)) {
+          const numero = this.pedidoSelecionado?.mesaNumero || `Mesa ${mesaId}`;
+          this.mesasExibicao = [
+            ...this.mesasExibicao,
+            { id: mesaId, numero, empresaId: this.pedidoSelecionado?.empresaId ?? 0 }
+          ];
+        }
+      },
       error: (err) => {
         console.error('Erro ao carregar mesas', err);
         this.mesas = [];
+        this.mesasExibicao = [];
       }
     });
   }
 
   private normalizarStatus(status?: string): string {
     return (status ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+
+  abrirConfirmacao(mensagem: string, acao: () => void): void {
+    this.confirmacao = {
+      visivel: true,
+      mensagem,
+      acao
+    };
+  }
+
+  confirmarAcao(): void {
+    if (this.confirmacao.visivel && this.confirmacao.acao) {
+      this.confirmacao.acao();
+    }
+  }
+
+  cancelarConfirmacao(): void {
+    this.confirmacao = { visivel: false, mensagem: '', acao: () => {} };
   }
 
   private montarPayloadAtualizacao(status: string): PedidoUpdatePayload | null {

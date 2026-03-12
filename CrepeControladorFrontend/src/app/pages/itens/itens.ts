@@ -26,6 +26,11 @@ export class Itens implements OnInit {
   mensagemItem = '';
   processandoToggle: Record<number, boolean> = {};
   itemEmEdicao: PedidoItemSelecionavel | null = null;
+  confirmacao = {
+    visivel: false,
+    mensagem: '',
+    acao: () => {}
+  };
 
   novoItem = this.criarNovoItem();
 
@@ -122,23 +127,29 @@ export class Itens implements OnInit {
       return;
     }
     const novoStatus = !item.ativo;
-    this.processandoToggle[item.id] = true;
-    this.pedidoService
-      .atualizarItem(item.id, {
-        nome: item.nome,
-        preco: item.preco,
-        ativo: novoStatus
-      })
-      .subscribe({
-      next: (atualizado) => {
-        this.processandoToggle[item.id] = false;
-        this.substituirItemLocal(atualizado);
-      },
-      error: (err) => {
-        console.error('Erro ao atualizar item', err);
-        this.processandoToggle[item.id] = false;
-      }
-    });
+    const confirmarToggle = () => {
+      this.processandoToggle[item.id] = true;
+      this.pedidoService
+        .atualizarItem(item.id, {
+          nome: item.nome,
+          preco: item.preco,
+          ativo: novoStatus
+        })
+        .subscribe({
+          next: (atualizado) => {
+            this.processandoToggle[item.id] = false;
+            this.substituirItemLocal(atualizado);
+            this.cancelarConfirmacao();
+          },
+          error: (err) => {
+            console.error('Erro ao atualizar item', err);
+            this.processandoToggle[item.id] = false;
+            this.cancelarConfirmacao();
+          }
+        });
+    };
+
+    this.abrirConfirmacao(novoStatus ? 'Ativar item?' : 'Desativar item?', confirmarToggle);
   }
 
   get itensAtuais(): PedidoItemSelecionavel[] {
@@ -214,5 +225,19 @@ export class Itens implements OnInit {
       item.id === itemAtualizado.id ? { ...item, ...itemAtualizado } : item
     );
     this.recalcularGrupos();
+  }
+
+  abrirConfirmacao(mensagem: string, acao: () => void): void {
+    this.confirmacao = { visivel: true, mensagem, acao };
+  }
+
+  confirmarAcao(): void {
+    if (this.confirmacao.visivel) {
+      this.confirmacao.acao();
+    }
+  }
+
+  cancelarConfirmacao(): void {
+    this.confirmacao = { visivel: false, mensagem: '', acao: () => {} };
   }
 }
