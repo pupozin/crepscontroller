@@ -96,3 +96,450 @@ VALUES ('20260311040421_AllowNullSenha', '6.0.32');
 
 COMMIT;
 
+-- Função para listar pedidos abertos por mesa (usa sempre que precisar agrupar por mesa)
+CREATE OR REPLACE FUNCTION "fn_Pedidos_Abertos_PorMesa"(p_empresaid INT)
+RETURNS TABLE(
+    "MesaId" INT,
+    "MesaNumero" VARCHAR,
+    "Id" INT,
+    "Codigo" VARCHAR,
+    "Cliente" TEXT,
+    "TipoPedido" VARCHAR,
+    "Status" VARCHAR,
+    "Observacao" TEXT,
+    "ValorTotal" NUMERIC,
+    "DataCriacao" TIMESTAMPTZ
+)
+AS $$
+    SELECT
+        p."MesaId",
+        COALESCE(m."Numero", 'Sem mesa') AS "MesaNumero",
+        p."Id",
+        p."Codigo",
+        p."Cliente",
+        p."TipoPedido",
+        p."Status",
+        p."Observacao",
+        p."ValorTotal",
+        p."DataCriacao"
+    FROM "Pedidos" p
+    LEFT JOIN "Mesas" m ON m."Id" = p."MesaId"
+    WHERE p."EmpresaId" = p_empresaid
+      AND p."Status" NOT IN ('Finalizado', 'Cancelado')
+    ORDER BY COALESCE(m."Numero", 'Sem mesa'), p."DataCriacao" DESC;
+$$ LANGUAGE sql STABLE;
+
+-- ===================================================================
+-- Funções armazenadas (mantenha versionadas ao subir para produção)
+-- ===================================================================
+
+CREATE OR REPLACE FUNCTION "fn_Pedidos_Abertos_PorMesa"(p_empresaid INT)
+RETURNS TABLE(
+    "MesaId" INT,
+    "MesaNumero" VARCHAR,
+    "Id" INT,
+    "Codigo" VARCHAR,
+    "Cliente" TEXT,
+    "TipoPedido" VARCHAR,
+    "Status" VARCHAR,
+    "Observacao" TEXT,
+    "ValorTotal" NUMERIC,
+    "DataCriacao" TIMESTAMPTZ
+)
+AS $$
+    SELECT
+        p."MesaId",
+        COALESCE(m."Numero", 'Sem mesa') AS "MesaNumero",
+        p."Id",
+        p."Codigo",
+        p."Cliente",
+        p."TipoPedido",
+        p."Status",
+        p."Observacao",
+        p."ValorTotal",
+        p."DataCriacao"
+    FROM "Pedidos" p
+    LEFT JOIN "Mesas" m ON m."Id" = p."MesaId"
+    WHERE p."EmpresaId" = p_empresaid
+      AND p."TipoPedido" = 'Restaurante'
+      AND p."Status" NOT IN ('Finalizado', 'Cancelado')
+    ORDER BY COALESCE(m."Numero", 'Sem mesa'), p."DataCriacao" DESC;
+$$ LANGUAGE sql STABLE;
+
+CREATE OR REPLACE FUNCTION "sp_Admin_Empresa_Obter"(empresa_id integer)
+RETURNS TABLE("Id" integer, "Cnpj" text, "Nome" text, "RazaoSocial" text, "Seguimento" text)
+LANGUAGE sql
+AS $function$
+    SELECT "Id", "Cnpj", "Nome", "RazaoSocial", "Seguimento"
+    FROM "Empresas"
+    WHERE "Id" = empresa_id;
+$function$;
+
+CREATE OR REPLACE FUNCTION "sp_Admin_Usuarios_ListarPorEmpresa"(empresa_id integer)
+RETURNS TABLE("Id" integer, "Email" text, "Nome" text, "PerfilId" integer, "PerfilNome" text)
+LANGUAGE sql
+AS $function$
+    SELECT u."Id", u."Email", u."Nome", u."PerfilId", COALESCE(p."Nome", '') AS "PerfilNome"
+    FROM "Usuarios" u
+    LEFT JOIN "Perfis" p ON p."Id" = u."PerfilId"
+    WHERE u."EmpresaId" = empresa_id;
+$function$;
+
+CREATE OR REPLACE FUNCTION sp_admin_usuarios_listarporempresa(empresa_id integer)
+RETURNS TABLE(id integer, email text, nome text, perfilid integer, perfilnome text)
+LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    SELECT
+        u.Id,
+        u.Email,
+        u.Nome,
+        u.PerfilId,
+        COALESCE(p.Nome, '') AS PerfilNome
+    FROM Usuarios u
+    LEFT JOIN Perfis p ON p.Id = u.PerfilId
+    WHERE u.EmpresaId = empresa_id;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "sp_Dashboard_HorariosPico_Periodo"("DataInicio" date, "DataFim" date, "EmpresaId" integer)
+RETURNS TABLE("Hora" integer, "QuantidadePedidos" bigint, "Faturamento" numeric)
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    inicio DATE := "DataInicio";
+    fim    DATE := "DataFim";
+    empresa INT := "EmpresaId";
+BEGIN
+    -- Usa o primeiro e o ultimo pedido finalizado da empresa caso nao receba datas
+    IF inicio IS NULL OR fim IS NULL THEN
+        SELECT
+            COALESCE(inicio, MIN("DataCriacao"::DATE)),
+            COALESCE(fim,    MAX("DataCriacao"::DATE))
+        INTO inicio, fim
+        FROM "Pedidos"
+        WHERE "Status" = 'Finalizado'
+          AND "EmpresaId" = empresa;
+    END IF;
+
+    IF inicio IS NULL OR fim IS NULL OR empresa IS NULL THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        EXTRACT(HOUR FROM p."DataCriacao")::INT AS "Hora",
+        COUNT(*)::BIGINT                        AS "QuantidadePedidos",
+        SUM(p."ValorTotal")::NUMERIC(18,2)      AS "Faturamento"
+    FROM "Pedidos" p
+    WHERE p."Status" = 'Finalizado'
+      AND p."EmpresaId" = empresa
+      AND p."DataCriacao"::DATE BETWEEN inicio AND fim
+    GROUP BY EXTRACT(HOUR FROM p."DataCriacao")
+    ORDER BY "Hora";
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "sp_Dashboard_HorariosPico_DiaSemanaResumo"("DataInicio" date, "DataFim" date, "EmpresaId" integer)
+RETURNS TABLE("DiaSemana" smallint, "NomeDia" text, "Hora" integer, "QuantidadePedidos" bigint, "Faturamento" numeric)
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    inicio DATE := "DataInicio";
+    fim    DATE := "DataFim";
+    empresa INT := "EmpresaId";
+BEGIN
+    -- Usa o primeiro e o ultimo pedido finalizado da empresa caso nao receba datas
+    IF inicio IS NULL OR fim IS NULL THEN
+        SELECT
+            COALESCE(inicio, MIN("DataCriacao"::DATE)),
+            COALESCE(fim,    MAX("DataCriacao"::DATE))
+        INTO inicio, fim
+        FROM "Pedidos"
+        WHERE "Status" = 'Finalizado'
+          AND "EmpresaId" = empresa;
+    END IF;
+
+    -- Sem pedidos: devolve todos os dias com zero
+    IF inicio IS NULL OR fim IS NULL OR empresa IS NULL THEN
+        RETURN QUERY
+        SELECT
+            d."DiaSemana",
+            d."NomeDia",
+            0::INT           AS "Hora",
+            0::BIGINT        AS "QuantidadePedidos",
+            0::NUMERIC(18,2) AS "Faturamento"
+        FROM (
+            VALUES
+                (1::SMALLINT, 'Segunda'::TEXT),
+                (2::SMALLINT, 'Terca'::TEXT),
+                (3::SMALLINT, 'Quarta'::TEXT),
+                (4::SMALLINT, 'Quinta'::TEXT),
+                (5::SMALLINT, 'Sexta'::TEXT),
+                (6::SMALLINT, 'Sabado'::TEXT),
+                (7::SMALLINT, 'Domingo'::TEXT)
+        ) AS d("DiaSemana", "NomeDia")
+        ORDER BY d."DiaSemana";
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    WITH dias_semana AS (
+        SELECT *
+        FROM (
+            VALUES
+                (1::SMALLINT, 'Segunda'::TEXT),
+                (2::SMALLINT, 'Terca'::TEXT),
+                (3::SMALLINT, 'Quarta'::TEXT),
+                (4::SMALLINT, 'Quinta'::TEXT),
+                (5::SMALLINT, 'Sexta'::TEXT),
+                (6::SMALLINT, 'Sabado'::TEXT),
+                (7::SMALLINT, 'Domingo'::TEXT)
+        ) AS x("DiaSemana", "NomeDia")
+    ),
+    base AS (
+        SELECT
+            (CASE
+                WHEN EXTRACT(DOW FROM p."DataCriacao")::INT = 0 THEN 7
+                ELSE EXTRACT(DOW FROM p."DataCriacao")::INT
+             END)::SMALLINT                       AS "DiaSemana",
+            EXTRACT(HOUR FROM p."DataCriacao")::INT AS "Hora",
+            COUNT(*)::BIGINT                      AS "QuantidadePedidos",
+            SUM(p."ValorTotal")::NUMERIC(18,2)    AS "Faturamento"
+        FROM "Pedidos" p
+        WHERE p."Status" = 'Finalizado'
+          AND p."EmpresaId" = empresa
+          AND p."DataCriacao"::DATE BETWEEN inicio AND fim
+        GROUP BY
+            (CASE
+                WHEN EXTRACT(DOW FROM p."DataCriacao")::INT = 0 THEN 7
+                ELSE EXTRACT(DOW FROM p."DataCriacao")::INT
+             END),
+            EXTRACT(HOUR FROM p."DataCriacao")
+    )
+    SELECT
+        d."DiaSemana",
+        d."NomeDia",
+        COALESCE(r."Hora", 0)                       AS "Hora",
+        COALESCE(r."QuantidadePedidos", 0)          AS "QuantidadePedidos",
+        COALESCE(r."Faturamento", 0::NUMERIC(18,2)) AS "Faturamento"
+    FROM dias_semana d
+    LEFT JOIN LATERAL (
+        SELECT
+            b."Hora",
+            b."QuantidadePedidos",
+            b."Faturamento"
+        FROM base b
+        WHERE b."DiaSemana" = d."DiaSemana"
+        ORDER BY b."QuantidadePedidos" DESC,
+                 b."Faturamento"       DESC,
+                 b."Hora"
+        LIMIT 1
+    ) r ON TRUE
+    ORDER BY d."DiaSemana";
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "sp_Dashboard_HorariosPico_DiaSemanaDistribuicao"("DataInicio" date, "DataFim" date, "EmpresaId" integer)
+RETURNS TABLE("DiaSemana" smallint, "NomeDia" text, "Hora" integer, "QuantidadePedidos" bigint, "Faturamento" numeric)
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    inicio DATE := "DataInicio";
+    fim    DATE := "DataFim";
+    empresa INT := "EmpresaId";
+BEGIN
+    -- Usa o primeiro e o ultimo pedido finalizado da empresa caso nao receba datas
+    IF inicio IS NULL OR fim IS NULL THEN
+        SELECT
+            COALESCE(inicio, MIN("DataCriacao"::DATE)),
+            COALESCE(fim,    MAX("DataCriacao"::DATE))
+        INTO inicio, fim
+        FROM "Pedidos"
+        WHERE "Status" = 'Finalizado'
+          AND "EmpresaId" = empresa;
+    END IF;
+
+    IF inicio IS NULL OR fim IS NULL OR empresa IS NULL THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    WITH dias_semana AS (
+        SELECT *
+        FROM (
+            VALUES
+                (1::SMALLINT, 'Segunda'::TEXT),
+                (2::SMALLINT, 'Terca'::TEXT),
+                (3::SMALLINT, 'Quarta'::TEXT),
+                (4::SMALLINT, 'Quinta'::TEXT),
+                (5::SMALLINT, 'Sexta'::TEXT),
+                (6::SMALLINT, 'Sabado'::TEXT),
+                (7::SMALLINT, 'Domingo'::TEXT)
+        ) AS x("DiaSemana", "NomeDia")
+    ),
+    base AS (
+        SELECT
+            (CASE
+                WHEN EXTRACT(DOW FROM p."DataCriacao")::INT = 0 THEN 7
+                ELSE EXTRACT(DOW FROM p."DataCriacao")::INT
+             END)::SMALLINT                       AS "DiaSemana",
+            EXTRACT(HOUR FROM p."DataCriacao")::INT AS "Hora",
+            COUNT(*)::BIGINT                      AS "QuantidadePedidos",
+            SUM(p."ValorTotal")::NUMERIC(18,2)    AS "Faturamento"
+        FROM "Pedidos" p
+        WHERE p."Status" = 'Finalizado'
+          AND p."EmpresaId" = empresa
+          AND p."DataCriacao"::DATE BETWEEN inicio AND fim
+        GROUP BY
+            (CASE
+                WHEN EXTRACT(DOW FROM p."DataCriacao")::INT = 0 THEN 7
+                ELSE EXTRACT(DOW FROM p."DataCriacao")::INT
+             END),
+            EXTRACT(HOUR FROM p."DataCriacao")
+    )
+    SELECT
+        b."DiaSemana",
+        d."NomeDia",
+        b."Hora",
+        b."QuantidadePedidos",
+        b."Faturamento"
+    FROM base b
+    INNER JOIN dias_semana d ON d."DiaSemana" = b."DiaSemana"
+    ORDER BY b."DiaSemana", b."Hora";
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "sp_Dashboard_ItensRanking"("DataInicio" date, "DataFim" date, "EmpresaId" integer)
+RETURNS TABLE("ItemId" integer, "Nome" text, "QuantidadeVendida" integer, "Faturamento" numeric)
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    inicio DATE := "DataInicio";
+    fim    DATE := "DataFim";
+    empresa INT := "EmpresaId";
+BEGIN
+    -- Usa o primeiro e o ultimo pedido finalizado da empresa caso nao receba datas
+    IF inicio IS NULL OR fim IS NULL THEN
+        SELECT
+            COALESCE(inicio, MIN("DataCriacao"::DATE)),
+            COALESCE(fim,    MAX("DataCriacao"::DATE))
+        INTO inicio, fim
+        FROM "Pedidos"
+        WHERE "Status" = 'Finalizado'
+          AND "EmpresaId" = empresa;
+    END IF;
+
+    IF inicio IS NULL OR fim IS NULL OR empresa IS NULL THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        i."Id" AS "ItemId",
+        i."Nome"::TEXT,
+        SUM(ip."Quantidade")::INT          AS "QuantidadeVendida",
+        SUM(ip."TotalItem")::NUMERIC(18,2) AS "Faturamento"
+    FROM "ItensPedidos" ip
+    INNER JOIN "Pedidos" p ON p."Id" = ip."PedidoId"
+    INNER JOIN "Itens"   i ON i."Id" = ip."ItemId"
+    WHERE p."Status" = 'Finalizado'
+      AND p."EmpresaId" = empresa
+      AND p."DataCriacao"::DATE BETWEEN inicio AND fim
+    GROUP BY i."Id", i."Nome"
+    ORDER BY "QuantidadeVendida" DESC, "Faturamento" DESC;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "sp_Dashboard_ResumoPeriodo"("DataInicio" date, "DataFim" date, "EmpresaId" integer)
+RETURNS TABLE("QtdePedidos" bigint, "FaturamentoTotal" numeric, "TicketMedio" numeric, "QtdeDiasPeriodo" integer, "MediaClientesPorDia" numeric)
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    inicio      DATE := "DataInicio";
+    fim         DATE := "DataFim";
+    empresa     INT := "EmpresaId";
+    diasPeriodo INTEGER;
+BEGIN
+    -- Usa o primeiro e o ultimo pedido finalizado da empresa caso nao receba datas
+    IF inicio IS NULL OR fim IS NULL THEN
+        SELECT
+            COALESCE(inicio, MIN("DataCriacao"::DATE)),
+            COALESCE(fim,    MAX("DataCriacao"::DATE))
+        INTO inicio, fim
+        FROM "Pedidos"
+        WHERE "Status" = 'Finalizado'
+          AND "EmpresaId" = empresa;
+    END IF;
+
+    IF inicio IS NULL OR fim IS NULL OR empresa IS NULL THEN
+        RETURN QUERY
+        SELECT
+            0::BIGINT           AS "QtdePedidos",
+            0::NUMERIC(18,2)    AS "FaturamentoTotal",
+            0::NUMERIC(18,2)    AS "TicketMedio",
+            0::INTEGER          AS "QtdeDiasPeriodo",
+            0::NUMERIC(18,2)    AS "MediaClientesPorDia";
+        RETURN;
+    END IF;
+
+    diasPeriodo := (fim - inicio) + 1;
+
+    RETURN QUERY
+    SELECT
+        COUNT(*)::BIGINT                                      AS "QtdePedidos",
+        COALESCE(SUM(p."ValorTotal"), 0)::NUMERIC(18,2)       AS "FaturamentoTotal",
+        CASE
+            WHEN COUNT(*) = 0 THEN 0::NUMERIC(18,2)
+            ELSE (SUM(p."ValorTotal") / COUNT(*))::NUMERIC(18,2)
+        END                                                   AS "TicketMedio",
+        diasPeriodo                                           AS "QtdeDiasPeriodo",
+        CASE
+            WHEN diasPeriodo = 0 THEN 0::NUMERIC(18,2)
+            ELSE (COUNT(*)::NUMERIC(18,2) / diasPeriodo)
+        END                                                   AS "MediaClientesPorDia"
+    FROM "Pedidos" p
+    WHERE p."Status" = 'Finalizado'
+      AND p."EmpresaId" = empresa
+      AND p."DataCriacao"::DATE BETWEEN inicio AND fim;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION "sp_Dashboard_TipoPedido"("DataInicio" date, "DataFim" date, "EmpresaId" integer)
+RETURNS TABLE("TipoPedido" text, "QtdePedidos" bigint, "Faturamento" numeric)
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    inicio DATE := "DataInicio";
+    fim    DATE := "DataFim";
+    empresa INT := "EmpresaId";
+BEGIN
+    -- Usa o primeiro e o ultimo pedido finalizado da empresa caso nao receba datas
+    IF inicio IS NULL OR fim IS NULL THEN
+        SELECT
+            COALESCE(inicio, MIN("DataCriacao"::DATE)),
+            COALESCE(fim,    MAX("DataCriacao"::DATE))
+        INTO inicio, fim
+        FROM "Pedidos"
+        WHERE "Status" = 'Finalizado'
+          AND "EmpresaId" = empresa;
+    END IF;
+
+    IF inicio IS NULL OR fim IS NULL OR empresa IS NULL THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        p."TipoPedido"::TEXT,
+        COUNT(*)::BIGINT                   AS "QtdePedidos",
+        SUM(p."ValorTotal")::NUMERIC(18,2) AS "Faturamento"
+    FROM "Pedidos" p
+    WHERE p."Status" = 'Finalizado'
+      AND p."EmpresaId" = empresa
+      AND p."DataCriacao"::DATE BETWEEN inicio AND fim
+    GROUP BY p."TipoPedido";
+END;
+$function$;
+

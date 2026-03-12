@@ -11,6 +11,9 @@
     <button class="tab" [class.active]="abaAtiva === 'tipos'" (click)="selecionarAba('tipos')">
       Por tipo
     </button>
+    <button class="tab" [class.active]="abaAtiva === 'mesas'" (click)="selecionarAba('mesas')">
+      Por mesa
+    </button>
   </div>
 
   <div *ngIf="abaAtiva === 'resumo'" class="aba-resumo">
@@ -101,6 +104,39 @@
     <div class="estado-vazio" *ngIf="!pedidosPorTipo[tipoAtivo]?.length">
       <p *ngIf="estaCarregandoTipo(tipoAtivo)">Carregando pedidos de {{ tipoAtivo }}...</p>
       <p *ngIf="!estaCarregandoTipo(tipoAtivo)">Nenhum pedido encontrado para {{ tipoAtivo }}.</p>
+    </div>
+  </div>
+
+  <div *ngIf="abaAtiva === 'mesas'" class="aba-tipos">
+    <div class="abas-internas">
+      <button
+        *ngFor="let mesa of mesasAba"
+        [class.active]="mesaAtiva === mesa"
+        (click)="selecionarMesa(mesa)"
+      >
+        {{ mesa }}
+      </button>
+    </div>
+
+    <div class="lista-processos" *ngIf="mesaAtiva && pedidosPorMesa[mesaAtiva]?.length">
+      <div *ngFor="let pedido of pedidosPorMesa[mesaAtiva]" class="linha-processo">
+        <span class="codigo">{{ pedido.codigo }}</span>
+        <span class="status">
+          <i class="fa-solid fa-circle" [style.color]="corStatus(pedido.status)"></i>
+          {{ pedido.status }}
+        </span>
+        <span><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</span>
+        <span><i class="fa-solid fa-coins"></i> {{ pedido.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+        <button class="btn-detalhes" (click)="abrirDetalhes(pedido)">Detalhes</button>
+        <button class="btn-acao" (click)="finalizarPedidoDireto(pedido)" [disabled]="acaoRapidaEmExecucao">
+          Finalizar pedido
+        </button>
+      </div>
+    </div>
+
+    <div class="estado-vazio" *ngIf="!mesaAtiva || !pedidosPorMesa[mesaAtiva]?.length">
+      <p *ngIf="mesasCarregando">Carregando pedidos por mesa...</p>
+      <p *ngIf="!mesasCarregando">Nenhum pedido encontrado para esta mesa.</p>
     </div>
   </div>
 

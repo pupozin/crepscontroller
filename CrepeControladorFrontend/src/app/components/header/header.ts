@@ -130,6 +130,12 @@ export class Header implements OnInit, OnDestroy {
       return;
     }
 
+    const clienteValido = (this.novoPedido.cliente || '').trim().length <= 100;
+    if (!clienteValido) {
+      this.exibirToast('Nome do cliente deve ter no máximo 100 caracteres.', 'erro');
+      return;
+    }
+
     const itensValidos = this.novoPedido.itens
       .map((item) => ({
         itemId: item.itemId ?? undefined,
@@ -234,7 +240,7 @@ export class Header implements OnInit, OnDestroy {
   }
 
   private carregarMesas(): void {
-    this.mesaService.listar().subscribe({
+    this.mesaService.listarLivres().subscribe({
       next: (mesas) => (this.mesas = mesas),
       error: (err) => {
         console.error('Erro ao carregar mesas', err);

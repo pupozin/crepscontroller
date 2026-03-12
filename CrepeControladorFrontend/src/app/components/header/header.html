@@ -108,6 +108,7 @@
           [(ngModel)]="item.quantidade"
           [ngModelOptions]="{ standalone: true }"
           placeholder="Qtd."
+          required
         />
         <button class="btn-remover" type="button" (click)="removerItem(i)">
           <i class="fa-solid fa-times"></i>

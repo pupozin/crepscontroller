@@ -22,6 +22,16 @@ export class MesaService {
     });
   }
 
+  listarLivres(mesaIdAtual?: number | null): Observable<Mesa[]> {
+    const extras: Record<string, string | number | undefined> = { apenasLivres: 'true' };
+    if (mesaIdAtual) {
+      extras['incluirMesaId'] = mesaIdAtual;
+    }
+    return this.http.get<Mesa[]>(this.buildUrl('mesas'), {
+      params: this.buildParams(extras)
+    });
+  }
+
   criar(numero: string): Observable<Mesa> {
     return this.http.post<Mesa>(this.buildUrl('mesas'), {
       numero: numero.trim(),

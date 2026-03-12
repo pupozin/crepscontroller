@@ -342,6 +342,16 @@
         "Name": "empresaId",
         "Type": "System.Int32",
         "IsRequired": false
+      },
+      {
+        "Name": "apenasLivres",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "incluirMesaId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -554,6 +564,22 @@
         "Type": "System.String",
         "IsRequired": false
       },
+      {
+        "Name": "empresaId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CrepeControladorApi.Controllers.PedidosController",
+    "Method": "ListarPorMesa",
+    "RelativePath": "api/Pedidos/por-mesa",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
       {
         "Name": "empresaId",
         "Type": "System.Int32",

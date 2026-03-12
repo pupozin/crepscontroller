@@ -94,6 +94,8 @@
         <p><i class="fa-solid fa-user"></i> {{ clienteOuPadrao(pedido) }}</p>
         <p><i class="fa-solid fa-calendar-days"></i> Criado em {{ formatarData(pedido.dataCriacao) }}</p>
         <p><i class="fa-solid fa-calendar-check"></i> Encerrado {{ formatarData(pedido.dataConclusao) }}</p>
+        <p *ngIf="pedido.mesaNumero"><i class="fa-solid fa-chair"></i> Mesa: {{ pedido.mesaNumero }}</p>
+        <p *ngIf="pedido.endereco"><i class="fa-solid fa-location-dot"></i> Entrega: {{ pedido.endereco }}</p>
         <p><i class="fa-solid fa-comment"></i> {{ pedido.observacao || 'Sem observacoes.' }}</p>
         <p class="valor-total">
           <i class="fa-solid fa-coins"></i>

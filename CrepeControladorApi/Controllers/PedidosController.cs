@@ -114,6 +114,78 @@ namespace CrepeControladorApi.Controllers
             });
         }
 
+        [HttpGet("por-mesa")]
+        public async Task<IActionResult> ListarPorMesa([FromQuery][Range(1, int.MaxValue)] int empresaId)
+        {
+            if (!_currentUser.EmpresaAutorizada(empresaId))
+            {
+                return Forbid();
+            }
+
+            var connection = _context.Database.GetDbConnection();
+            var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+            if (shouldClose)
+            {
+                await connection.OpenAsync();
+                await connection.EnsureApplicationTimeZoneAsync();
+            }
+
+            var grupos = new Dictionary<string, List<PedidoResumoDto>>(StringComparer.OrdinalIgnoreCase);
+
+            try
+            {
+                await using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM \"fn_Pedidos_Abertos_PorMesa\"(@EmpresaId)";
+                var p = command.CreateParameter();
+                p.ParameterName = "@EmpresaId";
+                p.Value = empresaId;
+                command.Parameters.Add(p);
+
+                await using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var mesaId = reader.IsDBNull(reader.GetOrdinal("MesaId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("MesaId"));
+                    var mesaNumero = reader.IsDBNull(reader.GetOrdinal("MesaNumero")) ? "Sem mesa" : reader.GetString(reader.GetOrdinal("MesaNumero"));
+                    var pedido = new PedidoResumoDto
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        Codigo = reader.GetString(reader.GetOrdinal("Codigo")),
+                        Cliente = reader.IsDBNull(reader.GetOrdinal("Cliente")) ? null : reader.GetString(reader.GetOrdinal("Cliente")),
+                        TipoPedido = reader.GetString(reader.GetOrdinal("TipoPedido")),
+                        Status = reader.GetString(reader.GetOrdinal("Status")),
+                        Observacao = reader.IsDBNull(reader.GetOrdinal("Observacao")) ? null : reader.GetString(reader.GetOrdinal("Observacao")),
+                        ValorTotal = reader.GetDecimal(reader.GetOrdinal("ValorTotal")),
+                        DataCriacao = reader.GetDateTime(reader.GetOrdinal("DataCriacao")),
+                        EmpresaId = empresaId,
+                        MesaId = mesaId,
+                        MesaNumero = mesaNumero
+                    };
+
+                    if (!grupos.ContainsKey(mesaNumero))
+                    {
+                        grupos[mesaNumero] = new List<PedidoResumoDto>();
+                    }
+                    grupos[mesaNumero].Add(pedido);
+                }
+            }
+            finally
+            {
+                if (shouldClose)
+                {
+                    await connection.CloseAsync();
+                }
+            }
+
+            var resposta = grupos.Select(g => new
+            {
+                Mesa = g.Key,
+                Pedidos = g.Value
+            });
+
+            return Ok(resposta);
+        }
+
         [HttpGet("pesquisar")]
         public async Task<IActionResult> PesquisarPedidos([FromQuery] string termo, [FromQuery][Range(1, int.MaxValue)] int empresaId)
         {

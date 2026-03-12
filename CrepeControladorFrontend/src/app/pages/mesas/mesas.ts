@@ -77,6 +77,7 @@ export class MesasPage implements OnInit {
         this.salvandoMesa = false;
         this.fecharModalMesa();
         this.listar();
+        window.location.reload();
       },
       error: (err) => {
         console.error('Erro ao salvar mesa', err);

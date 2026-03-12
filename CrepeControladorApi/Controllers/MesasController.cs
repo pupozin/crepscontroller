@@ -23,16 +23,33 @@ namespace CrepeControladorApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Listar([FromQuery][Range(1, int.MaxValue)] int empresaId)
+        public async Task<IActionResult> Listar(
+            [FromQuery][Range(1, int.MaxValue)] int empresaId,
+            [FromQuery] bool apenasLivres = false,
+            [FromQuery] int? incluirMesaId = null)
         {
             if (!_currentUser.EmpresaAutorizada(empresaId))
             {
                 return Forbid();
             }
 
-            var mesas = await _context.Mesas
+            var fechados = new[] { "Finalizado", "Cancelado" };
+
+            var query = _context.Mesas
                 .AsNoTracking()
-                .Where(m => m.EmpresaId == empresaId && m.Ativa)
+                .Where(m => m.EmpresaId == empresaId && m.Ativa);
+
+            if (apenasLivres)
+            {
+                query = query.Where(m =>
+                    (incluirMesaId.HasValue && m.Id == incluirMesaId.Value)
+                    || !_context.Pedidos.Any(p =>
+                        p.MesaId == m.Id
+                        && p.EmpresaId == empresaId
+                        && !fechados.Contains(p.Status)));
+            }
+
+            var mesas = await query
                 .OrderBy(m => m.Numero)
                 .Select(m => new { m.Id, m.Numero, m.EmpresaId })
                 .ToListAsync();

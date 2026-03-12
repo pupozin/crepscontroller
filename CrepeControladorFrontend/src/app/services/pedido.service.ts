@@ -80,6 +80,11 @@ export interface PedidoUpdatePayload {
   empresaId?: number;
 }
 
+export interface PedidosPorMesa {
+  mesa: string;
+  pedidos: PedidoResumo[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -109,6 +114,12 @@ export class PedidoService {
   listarPedidosAbertosPorTipo(tipoPedido: string): Observable<PedidoResumo[]> {
     return this.http.get<PedidoResumo[]>(this.buildUrl('pedidos/abertos'), {
       params: this.buildParams({ tipoPedido })
+    });
+  }
+
+  listarPedidosPorMesa(): Observable<PedidosPorMesa[]> {
+    return this.http.get<PedidosPorMesa[]>(this.buildUrl('pedidos/por-mesa'), {
+      params: this.buildParams()
     });
   }
 

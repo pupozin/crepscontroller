@@ -12,7 +12,7 @@ import {
 } from '../../services/pedido.service';
 import { Mesa, MesaService } from '../../services/mesa.service';
 
-type AbaPedidos = 'resumo' | 'tipos';
+type AbaPedidos = 'resumo' | 'tipos' | 'mesas';
 type PedidoItemForm = { itemId: number | null; quantidade: number };
 
 interface PedidoFormulario {
@@ -43,7 +43,11 @@ export class PedidosAbertos implements OnInit, OnDestroy {
   pedidosPreparando: PedidoResumo[] = [];
   pedidosProntos: PedidoResumo[] = [];
   pedidosPorTipo: Record<string, PedidoResumo[]> = {};
+  pedidosPorMesa: Record<string, PedidoResumo[]> = {};
+  mesasAba: string[] = [];
+  mesaAtiva = '';
   tiposCarregando: Record<string, boolean> = {};
+  mesasCarregando = false;
   itensDisponiveis: PedidoItemSelecionavel[] = [];
   mesas: Mesa[] = [];
 
@@ -70,6 +74,7 @@ export class PedidosAbertos implements OnInit, OnDestroy {
     this.carregarPedidosAbertos();
     this.carregarItensDisponiveis();
     this.carregarMesas();
+    this.carregarPedidosPorMesa();
 
     this.subscriptions.add(
       this.pedidoService.atualizacoes$.subscribe(() => this.recarregarDados())
@@ -96,11 +101,18 @@ export class PedidosAbertos implements OnInit, OnDestroy {
       this.carregarPedidosPorTipoSeNecessario(this.tipoAtivo);
       this.tiposPedido.forEach((tipo) => this.carregarPedidosPorTipoSeNecessario(tipo));
     }
+    if (aba === 'mesas') {
+      this.carregarPedidosPorMesa();
+    }
   }
 
   selecionarTipo(tipo: string): void {
     this.tipoAtivo = tipo;
     this.carregarPedidosPorTipoSeNecessario(tipo);
+  }
+
+  selecionarMesa(mesa: string): void {
+    this.mesaAtiva = mesa;
   }
 
   abrirDetalhes(pedido: PedidoResumo): void {
@@ -120,6 +132,7 @@ export class PedidosAbertos implements OnInit, OnDestroy {
       next: (detalhe) => {
         this.pedidoSelecionado = detalhe;
         this.preencherFormulario(detalhe);
+        this.carregarMesas(detalhe.mesaId ?? undefined);
         this.modalDetalhesAberto = true;
         this.carregandoDetalhes = false;
         this.pedidoIdParaAbrir = undefined;
@@ -189,6 +202,7 @@ export class PedidosAbertos implements OnInit, OnDestroy {
           (pedido) => this.normalizarStatus(pedido.status) === 'pronto'
         );
         this.carregando = false;
+        this.carregarMesas();
       },
       error: (err) => {
         console.error('Erro ao listar pedidos abertos', err);
@@ -196,6 +210,7 @@ export class PedidosAbertos implements OnInit, OnDestroy {
         this.pedidosPreparando = [];
         this.pedidosProntos = [];
         this.carregando = false;
+        this.carregarMesas();
       }
     });
   }
@@ -219,6 +234,32 @@ export class PedidosAbertos implements OnInit, OnDestroy {
     if (!this.pedidosPorTipo[tipo] && !this.tiposCarregando[tipo]) {
       this.carregarPedidosPorTipo(tipo);
     }
+  }
+
+  private carregarPedidosPorMesa(): void {
+    this.mesasCarregando = true;
+    this.pedidoService.listarPedidosPorMesa().subscribe({
+      next: (grupos) => {
+        this.pedidosPorMesa = {};
+        grupos.forEach((g) => {
+          this.pedidosPorMesa[g.mesa] = g.pedidos;
+        });
+        this.mesasAba = Object.keys(this.pedidosPorMesa);
+        if (this.mesasAba.length) {
+          this.mesaAtiva = this.mesaAtiva && this.pedidosPorMesa[this.mesaAtiva] ? this.mesaAtiva : this.mesasAba[0];
+        } else {
+          this.mesaAtiva = '';
+        }
+        this.mesasCarregando = false;
+      },
+      error: (err) => {
+        console.error('Erro ao listar pedidos por mesa', err);
+        this.pedidosPorMesa = {};
+        this.mesasAba = [];
+        this.mesaAtiva = '';
+        this.mesasCarregando = false;
+      }
+    });
   }
 
   adicionarItem(): void {
@@ -353,10 +394,12 @@ export class PedidosAbertos implements OnInit, OnDestroy {
   private recarregarDados(): void {
     this.carregarPedidosAbertos();
     Object.keys(this.pedidosPorTipo).forEach((tipo) => this.carregarPedidosPorTipo(tipo));
+    this.carregarPedidosPorMesa();
+    this.carregarMesas(this.pedidoSelecionado?.mesaId ?? undefined);
   }
 
-  private carregarMesas(): void {
-    this.mesaService.listar().subscribe({
+  private carregarMesas(mesaAtual?: number): void {
+    this.mesaService.listarLivres(mesaAtual).subscribe({
       next: (mesas) => (this.mesas = mesas),
       error: (err) => {
         console.error('Erro ao carregar mesas', err);
@@ -387,6 +430,11 @@ export class PedidosAbertos implements OnInit, OnDestroy {
 
     if (!itensValidos.length) {
       this.mensagemFormulario = 'Selecione ao menos um item valido.';
+      return null;
+    }
+
+    if ((this.pedidoFormulario.cliente || '').length > 100) {
+      this.mensagemFormulario = 'Cliente deve ter no máximo 100 caracteres.';
       return null;
     }
 
