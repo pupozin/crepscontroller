@@ -72,7 +72,7 @@
     <input type="text" [(ngModel)]="novoPedido.cliente" placeholder="Nome do cliente" />
 
     <label>Tipo do pedido</label>
-    <select [(ngModel)]="novoPedido.tipoPedido">
+    <select [(ngModel)]="novoPedido.tipoPedido" (change)="onTipoPedidoChange()">
       <option *ngFor="let tipo of tiposPedido" [value]="tipo">{{ tipo }}</option>
     </select>
 

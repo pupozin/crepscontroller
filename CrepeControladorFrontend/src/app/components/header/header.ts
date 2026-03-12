@@ -107,6 +107,7 @@ export class Header implements OnInit, OnDestroy {
       mesaId: null,
       itens: [{ itemId: null, quantidade: 1 }]
     };
+    this.carregarMesas();
     this.modalCriarAberto = true;
   }
 
@@ -237,6 +238,12 @@ export class Header implements OnInit, OnDestroy {
         this.carregandoItens = false;
       }
     });
+  }
+
+  onTipoPedidoChange(): void {
+    if (this.novoPedido.tipoPedido === 'Restaurante') {
+      this.carregarMesas();
+    }
   }
 
   private carregarMesas(): void {
