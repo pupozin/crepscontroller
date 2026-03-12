@@ -364,11 +364,20 @@ namespace CrepeControladorApi.Controllers
             }
 
             var estavaAberto = StatusPermiteAlteracao(pedido.Status);
+            var statusOriginal = pedido.Status;
 
             pedido.Cliente = pedidoDto.Cliente;
             pedido.TipoPedido = pedidoDto.TipoPedido;
-            pedido.Status = pedidoDto.Status;
             pedido.Observacao = pedidoDto.Observacao;
+            var itensForamAlterados = ItensForamAlterados(pedido.Itens, pedidoDto.Itens);
+            if (string.Equals(statusOriginal, "Pronto", StringComparison.OrdinalIgnoreCase) && itensForamAlterados)
+            {
+                pedido.Status = "Preparando";
+            }
+            else
+            {
+                pedido.Status = pedidoDto.Status;
+            }
             var tipoNormalizado = pedidoDto.TipoPedido.Trim();
             var (enderecoValido, mesaValida) = await ValidarEntregaMesaAsync(tipoNormalizado, pedidoDto.Endereco, pedidoDto.MesaId, pedidoDto.EmpresaId);
             if (!enderecoValido)
@@ -456,6 +465,37 @@ namespace CrepeControladorApi.Controllers
         {
             return string.Equals(status, "Finalizado", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(status, "Cancelado", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool ItensForamAlterados(ICollection<ItensPedido> itensExistentes, List<PedidoItemCreateDto> novosItens)
+        {
+            if (itensExistentes.Count != novosItens.Count)
+            {
+                return true;
+            }
+
+            var existentesPorItem = itensExistentes
+                .GroupBy(i => i.ItemId)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantidade));
+
+            var novosPorItem = novosItens
+                .GroupBy(i => i.ItemId)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantidade));
+
+            if (existentesPorItem.Count != novosPorItem.Count)
+            {
+                return true;
+            }
+
+            foreach (var atual in existentesPorItem)
+            {
+                if (!novosPorItem.TryGetValue(atual.Key, out var novaQuantidade) || novaQuantidade != atual.Value)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private async Task<string> GerarCodigoPedidoAsync(int empresaId)

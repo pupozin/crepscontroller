@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import {
   PedidoItemSelecionavel,
   PedidoResumo,
@@ -57,6 +58,8 @@ export class Header implements OnInit, OnDestroy {
     tipo: ''
   };
 
+  private readonly subscriptions = new Subscription();
+
   constructor(
     private readonly pedidoService: PedidoService,
     private readonly mesaService: MesaService,
@@ -66,11 +69,27 @@ export class Header implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.carregarItens();
-    this.carregarMesas();
+    const usuario = this.auth.obterUsuarioAtual();
+    if (usuario) {
+      this.carregarItens();
+      this.carregarMesas();
+    }
+
+    this.subscriptions.add(
+      this.auth.usuario$.subscribe((usuarioAutenticado) => {
+        if (usuarioAutenticado) {
+          this.carregarItens();
+          this.carregarMesas();
+        } else {
+          this.itensDisponiveis = [];
+          this.mesas = [];
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
     this.liberarScrollMobile();
   }
 
@@ -107,6 +126,7 @@ export class Header implements OnInit, OnDestroy {
       mesaId: null,
       itens: [{ itemId: null, quantidade: 1 }]
     };
+    this.carregarItens();
     this.carregarMesas();
     this.modalCriarAberto = true;
   }
@@ -226,6 +246,10 @@ export class Header implements OnInit, OnDestroy {
   }
 
   private carregarItens(): void {
+    if (!this.auth.obterEmpresaId()) {
+      this.itensDisponiveis = [];
+      return;
+    }
     this.carregandoItens = true;
     this.pedidoService.listarItens().subscribe({
       next: (itens) => {
@@ -247,6 +271,10 @@ export class Header implements OnInit, OnDestroy {
   }
 
   private carregarMesas(): void {
+    if (!this.auth.obterEmpresaId()) {
+      this.mesas = [];
+      return;
+    }
     this.mesaService.listarLivres().subscribe({
       next: (mesas) => (this.mesas = mesas),
       error: (err) => {
