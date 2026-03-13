@@ -178,11 +178,6 @@ export class Header implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.novoPedido.tipoPedido === 'Restaurante' && !this.novoPedido.mesaId) {
-      this.exibirToast('Selecione a mesa.', 'erro');
-      return;
-    }
-
     const payload = {
       cliente: this.novoPedido.cliente.trim() || undefined,
       tipoPedido: this.novoPedido.tipoPedido,

@@ -500,11 +500,6 @@ export class PedidosAbertos implements OnInit, OnDestroy {
       return null;
     }
 
-    if (tipo === 'Restaurante' && !mesaId) {
-      this.mensagemFormulario = 'Selecione uma mesa para pedidos de restaurante.';
-      return null;
-    }
-
     return {
       cliente: this.pedidoFormulario.cliente.trim() || undefined,
       tipoPedido: this.pedidoFormulario.tipoPedido,
