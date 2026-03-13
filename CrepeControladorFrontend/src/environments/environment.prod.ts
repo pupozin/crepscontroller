@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://crepscontroller-006e6.sevalla.app/api'
+  apiUrl: 'https://nixorfood-m6vmb.sevalla.app/api'
 };

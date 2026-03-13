@@ -27,7 +27,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
             policy
-                .WithOrigins("http://localhost:4200", "https://localhost:4200", "https://crepefael.netlify.app")
+                .WithOrigins("http://localhost:4200", "https://localhost:4200", "https://nixorfood.netlify.app")
                 .AllowAnyHeader()
                 .AllowAnyMethod());
 });
